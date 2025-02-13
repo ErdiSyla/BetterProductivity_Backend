@@ -1,4 +1,5 @@
-import com.erdi.AuthServiceApplication;
+package com.erdi;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
