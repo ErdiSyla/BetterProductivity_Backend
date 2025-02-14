@@ -1,0 +1,52 @@
+services:
+  postgres:
+    container_name: AuthService_postgres
+    image: postgres:17.2
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      PGDATA: /data/postgres
+    volumes:
+      - postgres:/data/postgres
+    ports:
+      - "5500:5432"
+    networks:
+      - AuthService_postgres
+    restart: unless-stopped
+
+  pgadmin:
+    container_name: AuthService_pgadmin
+    image: dpage/pgadmin4:9.0
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+    ports:
+      - "5050:80"
+    networks:
+      - AuthService_postgres
+
+  AuthService:
+    container_name: AuthService
+    build: .
+    ports:
+      - "8080:8080"
+    networks:
+      - AuthService_postgres
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/AuthService
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+    restart: unless-stopped
+    depends_on:
+      - postgres
+
+networks:
+  AuthService_postgres:
+    driver: bridge
+
+volumes:
+  postgres:
+  pgadmin:
