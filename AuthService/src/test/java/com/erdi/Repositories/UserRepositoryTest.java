@@ -29,7 +29,6 @@ public class UserRepositoryTest {
 	@BeforeEach
 	public void setUp(){
 		testUserModel1 = new UserModel(null,"Erdi Syla","repotest@gmail.com","test pass");
-
 	}
 
 	@Test
@@ -50,7 +49,7 @@ public class UserRepositoryTest {
 		if(userRepository.findById(id).isPresent()) {
 			returnedUser = userRepository.findById(id).get();
 		} else {
-			fail("User was not saved properly");
+			fail("User was not found. Was either stored improperly or invalid id");
 		}
 
 		assertThat(returnedUser).isNotNull();
@@ -68,5 +67,22 @@ public class UserRepositoryTest {
 
 		assertThat(deletedUser).isNotNull();
 		assertThat(deletedUser).isEmpty();
+	}
+
+	@Test
+	public void UserRepository_FindByEmail_ReturnsUserTest(){
+		String email = userRepository.saveAndFlush(testUserModel1).getEmail();
+		UserModel returnedUser = null;
+		if(userRepository.findUserByEmail(email).isPresent()) {
+			returnedUser = userRepository.findUserByEmail(email).get();
+		}else{
+			fail("User could not be found. Was either not stored properly or invalid email");
+		}
+
+		assertThat(returnedUser).isNotNull();
+		assertThat(returnedUser.getId()).isEqualTo(testUserModel1.getId());
+		assertThat(returnedUser.getUsername()).isEqualTo(testUserModel1.getUsername());
+		assertThat(returnedUser.getEmail()).isEqualTo(testUserModel1.getEmail());
+		assertThat(returnedUser.getPassword()).isEqualTo(testUserModel1.getPassword());
 	}
 }
