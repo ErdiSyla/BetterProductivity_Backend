@@ -85,4 +85,20 @@ public class UserRepositoryTest {
 		assertThat(returnedUser.getEmail()).isEqualTo(testUserModel1.getEmail());
 		assertThat(returnedUser.getPassword()).isEqualTo(testUserModel1.getPassword());
 	}
+
+	@Test
+	public void UserRepository_existsByEmail_ReturnsTrue(){
+		String email = userRepository.saveAndFlush(testUserModel1).getEmail();
+		boolean userExists = userRepository.existsByEmail(email);
+
+		assertThat(userExists).isTrue();
+	}
+
+	@Test
+	public void UserRepository_existsByEmail_ReturnsFalse(){
+		userRepository.saveAndFlush(testUserModel1);
+		boolean userExists = userRepository.existsByEmail("notActualUser@gmail.com");
+
+		assertThat(userExists).isFalse();
+	}
 }
