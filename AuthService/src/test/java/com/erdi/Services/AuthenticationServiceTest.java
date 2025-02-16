@@ -1,9 +1,13 @@
 package com.erdi.Services;
 
-import com.erdi.DTO.UserDto;
+import com.erdi.DTO.LoginRequestDTO;
+import com.erdi.DTO.UserDTO;
 import com.erdi.Exceptions.InvalidEmailException;
-import com.erdi.Exceptions.UserWithSameEmailExists;
+import com.erdi.Exceptions.InvalidPasswordException;
+import com.erdi.Exceptions.NoUserWithEmailException;
+import com.erdi.Exceptions.UserWithSameEmailException;
 import com.erdi.Models.ApiResponse;
+import com.erdi.Models.UserModel;
 import com.erdi.Repositories.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,10 +20,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @Testable
 @ExtendWith(MockitoExtension.class)
@@ -34,13 +41,17 @@ public class AuthenticationServiceTest {
 	@InjectMocks
 	private AuthenticationService authenticationService;
 
-	private UserDto testUser;
-	private UserDto invalidUser;
+	private UserModel testUserModel;
+	private UserDTO testUser;
+	private UserDTO invalidUser;
+	private LoginRequestDTO loginRequestDTO;
 
 	@BeforeEach
 	public void setUp(){
-		testUser = new UserDto("User","servicetest@gmail.com","test pass");
-		invalidUser = new UserDto("User", "invalidemail","pass");
+		testUserModel = new UserModel(1,"User","servicetest@gmail.com","test pass");
+		testUser = new UserDTO("User","servicetest@gmail.com","test pass");
+		invalidUser = new UserDTO("User", "invalidemail","pass");
+		loginRequestDTO = new LoginRequestDTO(testUser.email(),testUser.password());
 	}
 
 	@Test
@@ -50,8 +61,8 @@ public class AuthenticationServiceTest {
 		ResponseEntity<ApiResponse> response = authenticationService.signUp(testUser);
 
 		assertThat(response).isNotNull();
-		assertThat(response.getBody().getMessage()).isEqualTo("User created successfully");
-		assertThat(response.getBody().getStatus()).isEqualTo(201);
+		assertThat(response.getBody().getMessage()).isEqualTo("User created successfully.");
+		assertThat(response.getBody().getStatus()).isEqualTo(HttpStatus.CREATED.value());
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
 		verify(bCryptPasswordEncoder,times(1)).encode(testUser.password());
@@ -73,12 +84,61 @@ public class AuthenticationServiceTest {
 	public void AuthenticationService_SignUp_ThrowsUserWithSameEmailExistsException(){
 		given(userRepository.existsByEmail(testUser.email())).willReturn(true);
 
-		UserWithSameEmailExists emailExists = assertThrows(UserWithSameEmailExists.class, () -> {
+		UserWithSameEmailException emailExists = assertThrows(UserWithSameEmailException.class, () -> {
 			authenticationService.signUp(testUser);
 		});
 
 		assertThat(emailExists).isNotNull();
 		assertThat(emailExists.getMessage()).isEqualTo("A user with the same email exists.");
 		verify(userRepository,times(1)).existsByEmail(testUser.email());
+	}
+
+	@Test
+	public void AuthenticationService_SignIn_ReturnsResponseTest(){
+		given(userRepository.findUserByEmail(testUser.email()))
+				.willReturn(Optional.of(testUserModel));
+		given(bCryptPasswordEncoder.matches(testUser.password(),testUserModel.getPassword()))
+				.willReturn(true);
+
+		ResponseEntity<ApiResponse> response = authenticationService
+				.signIn(loginRequestDTO);
+
+		assertThat(response).isNotNull();
+		assertThat(response.getBody().getMessage()).isEqualTo("Login successful.");
+		assertThat(response.getBody().getStatus()).isEqualTo(HttpStatus.OK.value());
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+
+		verify(userRepository,times(1)).findUserByEmail(testUser.email());
+		verify(bCryptPasswordEncoder,times(1))
+				.matches(testUser.password(),testUserModel.getPassword());
+	}
+
+	@Test
+	public void AuthenticationService_SignIn_ThrowsNoUserWithEmailException(){
+
+		NoUserWithEmailException noUser = assertThrows(NoUserWithEmailException.class, () -> {
+			authenticationService.signIn(loginRequestDTO);
+		});
+
+		assertThat(noUser).isNotNull();
+		assertThat(noUser.getMessage()).isEqualTo("There is no existing userModel that holds this email. Please sign up.");
+		verify(userRepository,times(1)).findUserByEmail(testUser.email());
+	}
+
+	@Test
+	public void AuthenticationService_SignIn_ThrowsInvalidPasswordException(){
+		given(userRepository.findUserByEmail(testUser.email()))
+				.willReturn(Optional.of(testUserModel));
+
+		InvalidPasswordException invalidPassword = assertThrows(InvalidPasswordException.class,() -> {
+			authenticationService.signIn(loginRequestDTO);
+		});
+
+		assertThat(invalidPassword).isNotNull();
+		assertThat(invalidPassword.getMessage()).isEqualTo("The password entered is invalid. Please try again.");
+		verify(userRepository,times(1)).findUserByEmail(testUser.email());
+		verify(bCryptPasswordEncoder,times(1))
+				.matches(testUserModel.getPassword(), testUser.password());
 	}
 }

@@ -1,8 +1,11 @@
 package com.erdi.Services;
 
-import com.erdi.DTO.UserDto;
+import com.erdi.DTO.LoginRequestDTO;
+import com.erdi.DTO.UserDTO;
 import com.erdi.Exceptions.InvalidEmailException;
-import com.erdi.Exceptions.UserWithSameEmailExists;
+import com.erdi.Exceptions.InvalidPasswordException;
+import com.erdi.Exceptions.NoUserWithEmailException;
+import com.erdi.Exceptions.UserWithSameEmailException;
 import com.erdi.Models.ApiResponse;
 import com.erdi.Models.UserModel;
 import com.erdi.Repositories.UserRepository;
@@ -25,17 +28,38 @@ public class AuthenticationService {
 		this.encoder = encoder;
 	}
 
-	public ResponseEntity<ApiResponse> signUp(UserDto userDto) {
+	public ResponseEntity<ApiResponse> signUp(UserDTO userDto) {
 		String email = userDto.email();
+
 		if(!isValidEmail(email)){
 			throw new InvalidEmailException("The email provided is not valid.");
-		}else if(userRepository.existsByEmail(email)){
-			throw new UserWithSameEmailExists("A user with the same email exists.");
 		}
+
+		if(userRepository.existsByEmail(email)){
+			throw new UserWithSameEmailException("A user with the same email exists.");
+		}
+
 		UserModel userModel = convertDtoToModel(userDto,true);
 		userRepository.saveAndFlush(userModel);
-		ApiResponse response = new ApiResponse("User created successfully",HttpStatus.CREATED.value());
-		return new ResponseEntity<>(response ,HttpStatus.CREATED);
+
+		ApiResponse response = new ApiResponse("User created successfully.",HttpStatus.CREATED.value());
+		return ResponseEntity.status(HttpStatus.CREATED).body(response);
+	}
+
+	public ResponseEntity<ApiResponse> signIn(LoginRequestDTO loginRequestDTO) {
+		String email = loginRequestDTO.email();
+		String password = loginRequestDTO.password();
+
+		UserModel userModel = userRepository.findUserByEmail(email)
+				.orElseThrow(() -> new NoUserWithEmailException(
+						"There is no existing userModel that holds this email. Please sign up."));
+
+		if (!encoder.matches(password, userModel.getPassword())) {
+			throw new InvalidPasswordException("The password entered is invalid. Please try again.");
+		}
+
+		ApiResponse apiResponse = new ApiResponse("Login successful.", HttpStatus.OK.value());
+		return ResponseEntity.ok(apiResponse);
 	}
 
 	public boolean isValidEmail(String email) {
@@ -44,7 +68,7 @@ public class AuthenticationService {
 		return pattern.matcher(email).matches();
 	}
 
-	private UserModel convertDtoToModel(UserDto userDto,boolean encrypt){
+	private UserModel convertDtoToModel(UserDTO userDto, boolean encrypt){
 		if(encrypt){
 			return new UserModel(null,userDto.username(),userDto.email(), encoder.encode(userDto.password()));
 		}
