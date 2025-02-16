@@ -1,6 +1,7 @@
 package com.erdi.Controllers;
 
-import com.erdi.DTO.UserDto;
+import com.erdi.DTO.LoginRequestDTO;
+import com.erdi.DTO.UserDTO;
 import com.erdi.Models.ApiResponse;
 import com.erdi.Services.AuthenticationService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,8 +22,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -42,25 +43,41 @@ public class AuthControllerTest {
 	@Autowired
 	private ObjectMapper objectMapper;
 
-	private UserDto testUser;
+	private UserDTO testUser;
+	private LoginRequestDTO loginRequestDTO;
 
 	@BeforeEach
 	public void setUp() {
-		testUser = new UserDto("Test User", "testUser@gmail.com", "testUserPassword");
+		testUser = new UserDTO("Test User", "testUser@gmail.com", "testUserPassword");
+		loginRequestDTO = new LoginRequestDTO(testUser.email(),testUser.password());
 		MockitoAnnotations.openMocks(this);
 	}
 
 	@Test
 	public void AuthController_SignUp_TestReturnsToken() throws Exception {
-		ApiResponse response = new ApiResponse("User created successfully",HttpStatus.CREATED.value());
-		when(mockAuthenticationService.signUp(any(UserDto.class)))
-				.thenReturn(new ResponseEntity<>(response,HttpStatus.CREATED));
+		ApiResponse response = new ApiResponse("User created successfully.",HttpStatus.CREATED.value());
+		given(mockAuthenticationService.signUp(any(UserDTO.class)))
+				.willReturn(new ResponseEntity<>(response,HttpStatus.CREATED));
 
 		mockMvc.perform(post("/auth/signup")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(objectMapper.writeValueAsString(testUser)))
 				.andExpect(status().isCreated())
-				.andExpect(content().string("{\"message\":\"User created successfully\",\"status\":201}"));
+				.andExpect(content().string("{\"message\":\"User created successfully.\",\"status\":201}"));
+	}
+
+	@Test
+	public void AuthController_SignIn_TestReturnsToken() throws Exception {
+		ApiResponse response = new ApiResponse("Login successful.",HttpStatus.OK.value());
+		given(mockAuthenticationService.signIn(loginRequestDTO))
+				.willReturn(new ResponseEntity<>(response,HttpStatus.OK));
+
+		mockMvc.perform(post("/auth/signin")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(loginRequestDTO)))
+				.andExpect(status().isOk())
+				.andExpect(content().string("{\"message\":\"Login successful.\",\"status\":200}"));
+
 	}
 
 	@TestConfiguration

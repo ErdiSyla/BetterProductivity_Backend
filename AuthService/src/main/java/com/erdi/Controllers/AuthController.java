@@ -1,6 +1,7 @@
 package com.erdi.Controllers;
 
-import com.erdi.DTO.UserDto;
+import com.erdi.DTO.LoginRequestDTO;
+import com.erdi.DTO.UserDTO;
 import com.erdi.Models.ApiResponse;
 import com.erdi.Services.AuthenticationService;
 import lombok.AllArgsConstructor;
@@ -18,7 +19,12 @@ public class AuthController {
 	private final AuthenticationService authenticationService;
 
 	@PostMapping("/signup")
-	public ResponseEntity<ApiResponse> signUp(@RequestBody UserDto userDto){
+	public ResponseEntity<ApiResponse> signUp(@RequestBody UserDTO userDto){
 		return authenticationService.signUp(userDto);
+	}
+
+	@PostMapping("/signin")
+	public ResponseEntity<ApiResponse> signIn(@RequestBody LoginRequestDTO loginRequestDTO){
+		return authenticationService.signIn(loginRequestDTO);
 	}
 }
