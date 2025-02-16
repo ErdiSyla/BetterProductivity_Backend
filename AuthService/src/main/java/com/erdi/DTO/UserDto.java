@@ -1,5 +1,5 @@
 package com.erdi.DTO;
 
-public record UserDto(String username, String email,
-		String password) {
+public record UserDTO(String username, String email,
+					  String password) {
 }
