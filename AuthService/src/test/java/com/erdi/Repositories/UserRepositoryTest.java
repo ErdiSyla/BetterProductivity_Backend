@@ -1,6 +1,7 @@
 package com.erdi.Repositories;
 
 import com.erdi.Models.UserModel;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.annotation.Testable;
@@ -43,14 +44,10 @@ public class UserRepositoryTest {
 	}
 
 	@Test
-	public void UserRepository_FindById_ReturnsUserTest(){
+	public void UserRepository_FindById_ReturnsUserTest() throws Throwable{
 		int id = userRepository.saveAndFlush(testUserModel1).getId();
-		UserModel returnedUser = null;
-		if(userRepository.findById(id).isPresent()) {
-			returnedUser = userRepository.findById(id).get();
-		} else {
-			fail("User was not found. Was either stored improperly or invalid id");
-		}
+		UserModel returnedUser = userRepository.findById(id)
+						.orElseThrow(Assertions::fail);
 
 		assertThat(returnedUser).isNotNull();
 		assertThat(returnedUser.getId()).isEqualTo(testUserModel1.getId());
@@ -60,7 +57,7 @@ public class UserRepositoryTest {
 	}
 
 	@Test
-	public void UserRepository_Delete_ReturnsNothingTest(){
+	public void UserRepository_DeleteById_ReturnsNothingTest(){
 		int id = userRepository.saveAndFlush(testUserModel1).getId();
 		userRepository.deleteById(id);
 		Optional<UserModel> deletedUser = userRepository.findById(id);
