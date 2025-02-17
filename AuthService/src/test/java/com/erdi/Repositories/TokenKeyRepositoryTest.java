@@ -12,6 +12,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,6 +25,7 @@ public class TokenKeyRepositoryTest {
 	private final TokenKeyRepository tokenKeyRepository;
 
 	private TokenKeyModel testTokenKeyModel;
+	private TokenKeyModel graceTokenKeyModel;
 
 	public TokenKeyRepositoryTest(@Autowired TokenKeyRepository tokenKeyRepository){
 		this.tokenKeyRepository = tokenKeyRepository;
@@ -33,6 +35,8 @@ public class TokenKeyRepositoryTest {
 	public void setUp(){
 		testTokenKeyModel = new TokenKeyModel(null,"test public key","test private key",
 				KeyActivity.ACTIVE, Instant.now());
+		graceTokenKeyModel = new TokenKeyModel(null,"test public key","test private key",
+				KeyActivity.GRACE, Instant.now());
 	}
 
 	@Test
@@ -75,4 +79,17 @@ public class TokenKeyRepositoryTest {
 	}
 
 	@Test
+	public void TokenKeyRepository_DeleteByActivity_DeletesGraceKey(){
+		tokenKeyRepository.save(testTokenKeyModel);
+		tokenKeyRepository.save(graceTokenKeyModel);
+
+		tokenKeyRepository.deleteKeysByActivity();
+		List<TokenKeyModel> keysAfterDeletion = tokenKeyRepository.findAll();
+
+		assertThat(keysAfterDeletion).isNotNull();
+		assertThat(keysAfterDeletion).isNotEmpty();
+		assertThat(keysAfterDeletion.size()).isEqualTo(1);
+		assertThat(keysAfterDeletion.getFirst()).isEqualTo(testTokenKeyModel);
+	}
+
 }
