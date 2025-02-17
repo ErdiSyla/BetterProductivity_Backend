@@ -24,7 +24,7 @@ public class TokenKeyRepositoryTest {
 
 	private final TokenKeyRepository tokenKeyRepository;
 
-	private TokenKeyModel testTokenKeyModel;
+	private TokenKeyModel activeTokenKeyModel;
 	private TokenKeyModel graceTokenKeyModel;
 
 	public TokenKeyRepositoryTest(@Autowired TokenKeyRepository tokenKeyRepository){
@@ -33,7 +33,7 @@ public class TokenKeyRepositoryTest {
 
 	@BeforeEach
 	public void setUp(){
-		testTokenKeyModel = new TokenKeyModel(null,"test public key","test private key",
+		activeTokenKeyModel = new TokenKeyModel(null,"test public key","test private key",
 				KeyActivity.ACTIVE, Instant.now());
 		graceTokenKeyModel = new TokenKeyModel(null,"test public key","test private key",
 				KeyActivity.GRACE, Instant.now());
@@ -41,35 +41,35 @@ public class TokenKeyRepositoryTest {
 
 	@Test
 	public void TokenKeyRepository_Save_ReturnsTokenKeyTest(){
-		TokenKeyModel returnedKey = tokenKeyRepository.save(testTokenKeyModel);
+		TokenKeyModel returnedKey = tokenKeyRepository.save(activeTokenKeyModel);
 
 		assertThat(returnedKey).isNotNull();
 		assertThat(returnedKey.getKeyId()).isNotNull();
 		assertThat(returnedKey.getKeyId()).isGreaterThan(0);
-		assertThat(returnedKey.getPublicKey()).isEqualTo(testTokenKeyModel.getPublicKey());
-		assertThat(returnedKey.getPrivateKey()).isEqualTo(testTokenKeyModel.getPrivateKey());
+		assertThat(returnedKey.getPublicKey()).isEqualTo(activeTokenKeyModel.getPublicKey());
+		assertThat(returnedKey.getPrivateKey()).isEqualTo(activeTokenKeyModel.getPrivateKey());
 		assertThat(returnedKey.getKeyActivity()).isEqualTo(KeyActivity.ACTIVE);
 		assertThat(returnedKey.getTimeOfCreation()).isBefore(Instant.now());
 	}
 
 	@Test
 	public void TokenKeyRepository_FindById_ReturnsTokenKeyTest() throws Throwable{
-		int keyId = tokenKeyRepository.save(testTokenKeyModel).getKeyId();
+		int keyId = tokenKeyRepository.save(activeTokenKeyModel).getKeyId();
 
 		TokenKeyModel returnedKey = tokenKeyRepository.findById(keyId)
 				.orElseThrow(Assertions::fail);
 
 		assertThat(returnedKey).isNotNull();
 		assertThat(returnedKey.getKeyId()).isEqualTo(keyId);
-		assertThat(returnedKey.getPublicKey()).isEqualTo(testTokenKeyModel.getPublicKey());
-		assertThat(returnedKey.getPrivateKey()).isEqualTo(testTokenKeyModel.getPrivateKey());
+		assertThat(returnedKey.getPublicKey()).isEqualTo(activeTokenKeyModel.getPublicKey());
+		assertThat(returnedKey.getPrivateKey()).isEqualTo(activeTokenKeyModel.getPrivateKey());
 		assertThat(returnedKey.getKeyActivity()).isEqualTo(KeyActivity.ACTIVE);
-		assertThat(returnedKey.getTimeOfCreation()).isEqualTo(testTokenKeyModel.getTimeOfCreation());
+		assertThat(returnedKey.getTimeOfCreation()).isEqualTo(activeTokenKeyModel.getTimeOfCreation());
 	}
 
 	@Test
 	public void TokenKeyRepository_DeleteById_ReturnsNothing(){
-		int keyId = tokenKeyRepository.save(testTokenKeyModel).getKeyId();
+		int keyId = tokenKeyRepository.save(activeTokenKeyModel).getKeyId();
 		tokenKeyRepository.deleteById(keyId);
 
 		Optional<TokenKeyModel> deletedKey= tokenKeyRepository.findById(keyId);
@@ -80,7 +80,7 @@ public class TokenKeyRepositoryTest {
 
 	@Test
 	public void TokenKeyRepository_DeleteByActivity_DeletesGraceKey(){
-		tokenKeyRepository.save(testTokenKeyModel);
+		tokenKeyRepository.save(activeTokenKeyModel);
 		tokenKeyRepository.save(graceTokenKeyModel);
 
 		tokenKeyRepository.deleteKeysByActivity();
@@ -89,7 +89,20 @@ public class TokenKeyRepositoryTest {
 		assertThat(keysAfterDeletion).isNotNull();
 		assertThat(keysAfterDeletion).isNotEmpty();
 		assertThat(keysAfterDeletion.size()).isEqualTo(1);
-		assertThat(keysAfterDeletion.getFirst()).isEqualTo(testTokenKeyModel);
+		assertThat(keysAfterDeletion.getFirst()).isEqualTo(activeTokenKeyModel);
+	}
+
+	@Test
+	public void TokenKeyRepository_findAllActiveKeys_ReturnsOnlyActiveKeys(){
+		tokenKeyRepository.save(activeTokenKeyModel);
+		tokenKeyRepository.save(graceTokenKeyModel);
+
+		List<TokenKeyModel> activeKeys = tokenKeyRepository.findAllActiveKeys();
+
+		assertThat(activeKeys).isNotNull();
+		assertThat(activeKeys).isNotEmpty();
+		assertThat(activeKeys.size()).isEqualTo(1);
+		assertThat(activeKeys.getFirst()).isEqualTo(activeTokenKeyModel);
 	}
 
 }

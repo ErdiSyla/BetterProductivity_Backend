@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface TokenKeyRepository extends JpaRepository<TokenKeyModel,Integer> {
 
@@ -14,4 +16,7 @@ public interface TokenKeyRepository extends JpaRepository<TokenKeyModel,Integer>
 	@Transactional
 	@Query("DELETE FROM TokenKeyModel t WHERE t.keyActivity = 'GRACE'")
 	void deleteKeysByActivity();
+
+	@Query("SELECT t FROM TokenKeyModel t WHERE t.keyActivity = 'ACTIVE'")
+	List<TokenKeyModel> findAllActiveKeys();
 }
