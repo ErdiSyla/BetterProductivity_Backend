@@ -11,6 +11,8 @@
 
   <modules>
     <module>AuthService</module>
+    <module>KeyService</module>
+    <module>KeyCronJob</module>
   </modules>
 
   <properties>
