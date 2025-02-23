@@ -1,10 +1,10 @@
 package com.erdi.Models;
 
+import com.erdi.DTO.KeyActivity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
 
@@ -28,8 +28,7 @@ public class TokenKeyModel {
 
 	@Enumerated(EnumType.STRING)
 	private KeyActivity keyActivity;
-
-	@CreationTimestamp
+	
 	@Column(nullable = false,updatable = false)
 	private Instant timeOfCreation;
 }
