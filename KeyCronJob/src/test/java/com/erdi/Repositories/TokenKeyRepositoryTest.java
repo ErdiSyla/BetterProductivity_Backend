@@ -1,7 +1,9 @@
 package com.erdi.Repositories;
 
-import com.erdi.Models.KeyActivity;
+import com.erdi.DTO.KeyActivity;
 import com.erdi.Models.TokenKeyModel;
+import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,6 +14,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,10 +25,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 @AutoConfigureTestDatabase(connection = EmbeddedDatabaseConnection.H2)
 public class TokenKeyRepositoryTest {
 
+	@Autowired
+	private EntityManager entityManager;
+
 	private final TokenKeyRepository tokenKeyRepository;
 
 	private TokenKeyModel activeTokenKeyModel;
 	private TokenKeyModel graceTokenKeyModel;
+	private TokenKeyModel oldTokenKeyModel;
 
 	public TokenKeyRepositoryTest(@Autowired TokenKeyRepository tokenKeyRepository){
 		this.tokenKeyRepository = tokenKeyRepository;
@@ -37,6 +44,8 @@ public class TokenKeyRepositoryTest {
 				KeyActivity.ACTIVE, Instant.now());
 		graceTokenKeyModel = new TokenKeyModel(null,"test public key","test private key",
 				KeyActivity.GRACE, Instant.now());
+		oldTokenKeyModel = new TokenKeyModel(null,"Old public key","Old private key",
+				KeyActivity.ACTIVE,Instant.now().minus(15, ChronoUnit.DAYS).truncatedTo(ChronoUnit.MILLIS));
 	}
 
 	@Test
@@ -79,11 +88,11 @@ public class TokenKeyRepositoryTest {
 	}
 
 	@Test
-	public void TokenKeyRepository_DeleteByActivity_DeletesGraceKey(){
+	public void TokenKeyRepository_DeleteOldKeys_DeletesGraceKey(){
 		tokenKeyRepository.save(activeTokenKeyModel);
 		tokenKeyRepository.save(graceTokenKeyModel);
 
-		tokenKeyRepository.deleteKeysByActivity();
+		tokenKeyRepository.deleteOldKeys();
 		List<TokenKeyModel> keysAfterDeletion = tokenKeyRepository.findAll();
 
 		assertThat(keysAfterDeletion).isNotNull();
@@ -91,6 +100,32 @@ public class TokenKeyRepositoryTest {
 		assertThat(keysAfterDeletion.size()).isEqualTo(1);
 		assertThat(keysAfterDeletion.getFirst()).isEqualTo(activeTokenKeyModel);
 	}
+
+	@Transactional
+	@Test
+	public void TokenKeyRepository_UpdateOldKeysToGrace_DeletesGraceKey(){
+		TokenKeyModel returnedTokenKey = tokenKeyRepository.save(oldTokenKeyModel);
+        System.out.println(returnedTokenKey.getTimeOfCreation());
+        Instant instant = Instant.now()
+                .minus(14, ChronoUnit.DAYS)
+                .truncatedTo(ChronoUnit.MILLIS);
+		int i = tokenKeyRepository.updateOldKeysToGrace(instant);
+		System.out.println(i);
+
+		entityManager.flush();
+		entityManager.clear();
+
+		TokenKeyModel updatedTokenKey = tokenKeyRepository.findById(returnedTokenKey.getKeyId()).get();
+        System.out.println(updatedTokenKey.getTimeOfCreation());
+
+		assertThat(updatedTokenKey).isNotNull();
+		assertThat(updatedTokenKey.getKeyId()).isEqualTo(returnedTokenKey.getKeyId());
+		assertThat(updatedTokenKey.getPublicKey()).isEqualTo(returnedTokenKey.getPublicKey());
+		assertThat(updatedTokenKey.getPrivateKey()).isEqualTo(returnedTokenKey.getPrivateKey());
+		assertThat(updatedTokenKey.getKeyActivity()).isEqualTo(KeyActivity.GRACE);
+		assertThat(updatedTokenKey.getTimeOfCreation()).isEqualTo(returnedTokenKey.getTimeOfCreation());
+	}
+
 
 	@Test
 	public void TokenKeyRepository_findAllActiveKeys_ReturnsOnlyActiveKeys(){
