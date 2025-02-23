@@ -1,6 +1,5 @@
 package com.erdi.DTO;
 
-import com.erdi.Models.KeyActivity;
 
 import java.time.Instant;
 
