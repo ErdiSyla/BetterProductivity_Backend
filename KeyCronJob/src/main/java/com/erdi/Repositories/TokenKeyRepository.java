@@ -21,7 +21,7 @@ public interface TokenKeyRepository extends JpaRepository<TokenKeyModel,Integer>
 	@Transactional
 	@Modifying
 	@Query(value = "UPDATE token_key SET key_activity = 'GRACE' WHERE time_of_creation <= ?", nativeQuery = true)
-	int updateOldKeysToGrace(Instant cutoffDate);
+	void updateOldKeysToGrace(Instant cutoffDate);
 
 	@Query("SELECT t FROM TokenKeyModel t WHERE t.keyActivity = 'ACTIVE'")
 	List<TokenKeyModel> findAllActiveKeys();

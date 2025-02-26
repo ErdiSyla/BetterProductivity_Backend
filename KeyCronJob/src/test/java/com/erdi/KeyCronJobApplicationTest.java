@@ -1,6 +1,5 @@
-package com.erdi.Services;
+package com.erdi;
 
-import com.erdi.KeyCronJobApplication;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
