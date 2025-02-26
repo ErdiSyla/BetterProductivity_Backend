@@ -70,7 +70,7 @@ public class AuthenticationServiceTest {
 	}
 
 	@Test
-	public void AuthenticationService_SignUp_ThrowsInvalidEmailException(){
+	public void AuthenticationService_SignUp_ThrowsInvalidEmailExceptionTest(){
 
 		InvalidEmailException emailException = assertThrows(InvalidEmailException.class, () -> {
 			authenticationService.signUp(invalidUser);
@@ -81,7 +81,7 @@ public class AuthenticationServiceTest {
 	}
 
 	@Test
-	public void AuthenticationService_SignUp_ThrowsUserWithSameEmailExistsException(){
+	public void AuthenticationService_SignUp_ThrowsUserWithSameEmailExistsExceptionTest(){
 		given(userRepository.existsByEmail(testUser.email())).willReturn(true);
 
 		UserWithSameEmailException emailExists = assertThrows(UserWithSameEmailException.class, () -> {
@@ -115,7 +115,7 @@ public class AuthenticationServiceTest {
 	}
 
 	@Test
-	public void AuthenticationService_SignIn_ThrowsNoUserWithEmailException(){
+	public void AuthenticationService_SignIn_ThrowsNoUserWithEmailExceptionTest(){
 
 		NoUserWithEmailException noUser = assertThrows(NoUserWithEmailException.class, () -> {
 			authenticationService.signIn(loginRequestDTO);
@@ -127,7 +127,7 @@ public class AuthenticationServiceTest {
 	}
 
 	@Test
-	public void AuthenticationService_SignIn_ThrowsInvalidPasswordException(){
+	public void AuthenticationService_SignIn_ThrowsInvalidPasswordExceptionTest(){
 		given(userRepository.findUserByEmail(testUser.email()))
 				.willReturn(Optional.of(testUserModel));
 

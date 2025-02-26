@@ -84,7 +84,7 @@ public class UserRepositoryTest {
 	}
 
 	@Test
-	public void UserRepository_existsByEmail_ReturnsTrue(){
+	public void UserRepository_existsByEmail_ReturnsTrueTest(){
 		String email = userRepository.saveAndFlush(testUserModel1).getEmail();
 		boolean userExists = userRepository.existsByEmail(email);
 
@@ -92,7 +92,7 @@ public class UserRepositoryTest {
 	}
 
 	@Test
-	public void UserRepository_existsByEmail_ReturnsFalse(){
+	public void UserRepository_existsByEmail_ReturnsFalseTest(){
 		userRepository.saveAndFlush(testUserModel1);
 		boolean userExists = userRepository.existsByEmail("notActualUser@gmail.com");
 

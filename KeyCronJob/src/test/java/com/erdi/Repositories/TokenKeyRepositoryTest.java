@@ -77,7 +77,7 @@ public class TokenKeyRepositoryTest {
 	}
 
 	@Test
-	public void TokenKeyRepository_DeleteById_ReturnsNothing(){
+	public void TokenKeyRepository_DeleteById_ReturnsNothingTest(){
 		int keyId = tokenKeyRepository.save(activeTokenKeyModel).getKeyId();
 		tokenKeyRepository.deleteById(keyId);
 
@@ -88,7 +88,7 @@ public class TokenKeyRepositoryTest {
 	}
 
 	@Test
-	public void TokenKeyRepository_DeleteOldKeys_DeletesGraceKey(){
+	public void TokenKeyRepository_DeleteOldKeys_DeletesGraceKeyTest(){
 		tokenKeyRepository.save(activeTokenKeyModel);
 		tokenKeyRepository.save(graceTokenKeyModel);
 
@@ -103,14 +103,13 @@ public class TokenKeyRepositoryTest {
 
 	@Transactional
 	@Test
-	public void TokenKeyRepository_UpdateOldKeysToGrace_DeletesGraceKey(){
+	public void TokenKeyRepository_UpdateOldKeysToGrace_DeletesGraceKeyTest(){
 		TokenKeyModel returnedTokenKey = tokenKeyRepository.save(oldTokenKeyModel);
         System.out.println(returnedTokenKey.getTimeOfCreation());
         Instant instant = Instant.now()
                 .minus(14, ChronoUnit.DAYS)
                 .truncatedTo(ChronoUnit.MILLIS);
-		int i = tokenKeyRepository.updateOldKeysToGrace(instant);
-		System.out.println(i);
+		tokenKeyRepository.updateOldKeysToGrace(instant);
 
 		entityManager.flush();
 		entityManager.clear();
@@ -128,7 +127,7 @@ public class TokenKeyRepositoryTest {
 
 
 	@Test
-	public void TokenKeyRepository_findAllActiveKeys_ReturnsOnlyActiveKeys(){
+	public void TokenKeyRepository_findAllActiveKeys_ReturnsOnlyActiveKeysTest(){
 		tokenKeyRepository.save(activeTokenKeyModel);
 		tokenKeyRepository.save(graceTokenKeyModel);
 
