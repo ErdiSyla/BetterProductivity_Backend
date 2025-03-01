@@ -21,6 +21,11 @@ import java.util.List;
 public class KeyManagementService {
 
     private final TokenKeyRepository tokenKeyRepository;
+    private final KafkaProducerService kafkaProducerService;
+
+    private static final String AUTH_SERVICE_TOPIC = "auth-service-keys";
+    private static final String VALIDATION_TOPIC = "validation-keys";
+    private static final String KEY_CHANGE_TOPIC = "key-change";
 
     @Transactional
     public void generateAndStoreKeyPair(){
@@ -64,6 +69,10 @@ public class KeyManagementService {
 
     private String encodeKeyToBase64(byte[] key){
         return Base64.getEncoder().encodeToString(key);
+    }
+
+    private String formatKeyMessage(String publicKey, String privateKey){
+        return "{\"publicKey\":\"" + publicKey + "\", \"privateKey\": \"" + privateKey +"\" }";
     }
 
 }
