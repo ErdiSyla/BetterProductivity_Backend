@@ -1,9 +1,12 @@
 package com.erdi.Services;
 
 import com.erdi.DTO.KeyActivity;
+import com.erdi.DTO.TokenKeyDTO;
 import com.erdi.Exceptions.InvalidAlgorithmException;
 import com.erdi.Models.TokenKeyModel;
 import com.erdi.Repositories.TokenKeyRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -34,8 +37,13 @@ public class KeyManagementService {
         String privateKey = encodeKeyToBase64(keyPair.getPrivate().getEncoded());
 
         TokenKeyModel tokenKey = new TokenKeyModel(null,publicKey,privateKey, KeyActivity.ACTIVE, Instant.now());
-        tokenKeyRepository.save(tokenKey);
+        tokenKeyRepository.saveAndFlush(tokenKey);
+
+        kafkaProducerService.sendMessage(AUTH_SERVICE_TOPIC,convertKeysToJson(findAllActiveKeys()));
+        kafkaProducerService.sendMessage(VALIDATION_TOPIC, convertKeysToJson(findAllKeys()));
+        kafkaProducerService.sendMessage(KEY_CHANGE_TOPIC, "New RSA key pair generated at " + Instant.now());
     }
+
 
     public List<TokenKeyModel> findAllActiveKeys(){
         return tokenKeyRepository.findAllActiveKeys();
@@ -50,11 +58,19 @@ public class KeyManagementService {
                 .minus(14, ChronoUnit.DAYS)
                 .truncatedTo(ChronoUnit.MILLIS);
         tokenKeyRepository.updateOldKeysToGrace(cutoffDate);
+
+        kafkaProducerService.sendMessage(AUTH_SERVICE_TOPIC,convertKeysToJson(findAllActiveKeys()));
+        kafkaProducerService.sendMessage(VALIDATION_TOPIC, convertKeysToJson(findAllKeys()));
+        kafkaProducerService.sendMessage(KEY_CHANGE_TOPIC, "Keys have been marked for removal at " + Instant.now());
     }
 
     @Transactional
     public void deleteOldKeys(){
         tokenKeyRepository.deleteOldKeys();
+
+        kafkaProducerService.sendMessage(AUTH_SERVICE_TOPIC,convertKeysToJson(findAllActiveKeys()));
+        kafkaProducerService.sendMessage(VALIDATION_TOPIC, convertKeysToJson(findAllKeys()));
+        kafkaProducerService.sendMessage(KEY_CHANGE_TOPIC, "Keys deleted at " + Instant.now());
     }
 
     private KeyPair generateRSAKeyPair(){
@@ -71,8 +87,16 @@ public class KeyManagementService {
         return Base64.getEncoder().encodeToString(key);
     }
 
-    private String formatKeyMessage(String publicKey, String privateKey){
-        return "{\"publicKey\":\"" + publicKey + "\", \"privateKey\": \"" + privateKey +"\" }";
+    private String convertKeysToJson(List<TokenKeyModel> keys){
+        try{
+            List<TokenKeyDTO> DTOs = keys.stream()
+                    .map(key -> new TokenKeyDTO(key.getKeyId(), key.getPublicKey(),key.getPrivateKey()))
+                    .toList();
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.writeValueAsString(DTOs);
+        }catch (JsonProcessingException e){
+            throw new RuntimeException(e);
+        }
     }
 
 }

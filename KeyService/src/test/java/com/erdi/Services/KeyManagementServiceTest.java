@@ -18,8 +18,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @Testable
 @ExtendWith(MockitoExtension.class)
@@ -28,15 +27,19 @@ public class KeyManagementServiceTest {
     @Mock
     private TokenKeyRepository tokenKeyRepository;
 
+    @Mock
+    private KafkaProducerService kafkaProducerService;
+
     @InjectMocks
     private KeyManagementService keyManagementService;
 
     @Test
     public void KeyManagementService_generateAndStoreKeyPair_SavesKey(){
+        doNothing().when(kafkaProducerService).sendMessage(anyString(),anyString());
         keyManagementService.generateAndStoreKeyPair();
 
         ArgumentCaptor<TokenKeyModel> captor = ArgumentCaptor.forClass(TokenKeyModel.class);
-        verify(tokenKeyRepository,times(1)).save(captor.capture());
+        verify(tokenKeyRepository,times(1)).saveAndFlush(captor.capture());
         TokenKeyModel tokenKeyModel = captor.getValue();
 
         assertThat(tokenKeyModel.getPublicKey()).isNotNull();
@@ -71,6 +74,7 @@ public class KeyManagementServiceTest {
 
     @Test
     public void KeyManagementService_markKeysForRemoval_CallsRepoTest(){
+        doNothing().when(kafkaProducerService).sendMessage(anyString(),anyString());
         keyManagementService.markKeysForRemoval();
 
         ArgumentCaptor<Instant> captor = ArgumentCaptor.forClass(Instant.class);
@@ -87,6 +91,7 @@ public class KeyManagementServiceTest {
 
     @Test
     public void KeyManagementService_deleteOldKeys_DeletesTest(){
+        doNothing().when(kafkaProducerService).sendMessage(anyString(),anyString());
         keyManagementService.deleteOldKeys();
 
         verify(tokenKeyRepository,times(1)).deleteOldKeys();
