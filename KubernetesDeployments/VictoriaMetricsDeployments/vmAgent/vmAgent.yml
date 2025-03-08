@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: vmagent
+  namespace: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: vmagent
+  template:
+    metadata:
+      labels:
+        app: vmagent
+    spec:
+      containers:
+        - name: vmagent
+          image: victoriametrics/vmagent:stable
+          args:
+            - '--remoteWrite.url=http://victoria-metrics-service:8428/api/v1/write'
+            - '--promscrape.config=/etc/vmagent/config/promscrape.yml'
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/vmagent/config
+      volumes:
+        - name: config-volume
+          configMap:
+            name: vmagent-promscrape-config
