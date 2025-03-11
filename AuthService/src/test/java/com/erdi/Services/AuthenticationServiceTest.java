@@ -61,8 +61,8 @@ public class AuthenticationServiceTest {
 		ResponseEntity<ApiResponse> response = authenticationService.signUp(testUser);
 
 		assertThat(response).isNotNull();
-		assertThat(response.getBody().getMessage()).isEqualTo("User created successfully.");
-		assertThat(response.getBody().getStatus()).isEqualTo(HttpStatus.CREATED.value());
+		assertThat(response.getBody().message()).isEqualTo("User created successfully.");
+		assertThat(response.getBody().status()).isEqualTo(HttpStatus.CREATED.value());
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
 		verify(bCryptPasswordEncoder,times(1)).encode(testUser.password());
@@ -104,8 +104,8 @@ public class AuthenticationServiceTest {
 				.signIn(loginRequestDTO);
 
 		assertThat(response).isNotNull();
-		assertThat(response.getBody().getMessage()).isEqualTo("Login successful.");
-		assertThat(response.getBody().getStatus()).isEqualTo(HttpStatus.OK.value());
+		assertThat(response.getBody().message()).isEqualTo("Login successful.");
+		assertThat(response.getBody().status()).isEqualTo(HttpStatus.OK.value());
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
 
