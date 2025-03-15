@@ -2,7 +2,7 @@ package com.erdi.Controllers;
 
 import com.erdi.DTO.LoginRequestDTO;
 import com.erdi.DTO.UserDTO;
-import com.erdi.Models.ApiResponse;
+import com.erdi.DTO.ApiResponse;
 import com.erdi.Services.AuthenticationService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;

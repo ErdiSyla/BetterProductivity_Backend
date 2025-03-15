@@ -1,9 +1,12 @@
-package com.erdi.DTO;
+package com.erdi.Models;
 
+import lombok.Getter;
+
+@Getter
 public enum ErrorCode {
     INVALID_EMAIL("EMAIL001"),
-    NO_USER_WITH_EMAIL("EMAIL002"),
-    USER_WITH_SAME_EMAIL("EMAIL003"),
+    NO_USER_EXISTS("EMAIL002"),
+    USER_ALREADY_EXISTS("EMAIL003"),
     INVALID_PASSWORD("PASSWORD001"),
     JWT_NO_KEYS("JWT001");
 
@@ -11,10 +14,6 @@ public enum ErrorCode {
 
     ErrorCode(String code){
         this.code = code;
-    }
-
-    public String getCode(){
-        return code;
     }
 
 }
