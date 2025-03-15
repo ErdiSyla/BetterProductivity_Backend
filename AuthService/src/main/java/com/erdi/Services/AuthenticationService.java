@@ -1,14 +1,17 @@
 package com.erdi.Services;
 
+import com.erdi.DTO.ApiResponse;
 import com.erdi.DTO.LoginRequestDTO;
 import com.erdi.DTO.UserDTO;
-import com.erdi.Exceptions.InvalidEmailException;
-import com.erdi.Exceptions.InvalidPasswordException;
-import com.erdi.Exceptions.NoUserWithEmailException;
-import com.erdi.Exceptions.UserWithSameEmailException;
-import com.erdi.Models.ApiResponse;
+import com.erdi.Exceptions.Implementation.InvalidEmailException;
+import com.erdi.Exceptions.Implementation.InvalidPasswordException;
+import com.erdi.Exceptions.Implementation.NoUserExistsException;
+import com.erdi.Exceptions.Implementation.UserAlreadyExistsException;
+import com.erdi.Models.ErrorCode;
 import com.erdi.Models.UserModel;
 import com.erdi.Repositories.UserRepository;
+import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -17,33 +20,36 @@ import org.springframework.stereotype.Service;
 import java.util.regex.Pattern;
 
 @Service
+@Slf4j
 public class AuthenticationService {
 
 	private final UserRepository userRepository;
 
 	private final BCryptPasswordEncoder encoder;
 
+	private static final Pattern EMAIL_PATTERN =
+			Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
+
 	public AuthenticationService(UserRepository userRepository, BCryptPasswordEncoder encoder){
 		this.userRepository = userRepository;
 		this.encoder = encoder;
 	}
 
+	@Transactional
 	public ResponseEntity<ApiResponse> signUp(UserDTO userDto) {
 		String email = userDto.email();
 
-		if(!isValidEmail(email)){
-			throw new InvalidEmailException("The email provided is not valid.");
-		}
+		isValidEmail(email);
+		ensureUserDoesNotExist(email);
 
-		if(userRepository.existsByEmail(email)){
-			throw new UserWithSameEmailException("A user with the same email exists.");
-		}
+		UserModel userModel = convertDtoToModel(userDto);
+		userRepository.save(userModel);
 
-		UserModel userModel = convertDtoToModel(userDto,true);
-		userRepository.saveAndFlush(userModel);
-
-		ApiResponse response = new ApiResponse("User created successfully.",HttpStatus.CREATED.value());
-		return ResponseEntity.status(HttpStatus.CREATED).body(response);
+		log.info("User with email: {} created successfully", email);
+		HttpStatus created = HttpStatus.CREATED;
+		return ResponseEntity.status(created)
+				.body(ApiResponse.builder("User created successfully."
+						,created.value()));
 	}
 
 	public ResponseEntity<ApiResponse> signIn(LoginRequestDTO loginRequestDTO) {
@@ -51,27 +57,40 @@ public class AuthenticationService {
 		String password = loginRequestDTO.password();
 
 		UserModel userModel = userRepository.findUserByEmail(email)
-				.orElseThrow(() -> new NoUserWithEmailException(
-						"There is no existing userModel that holds this email. Please sign up."));
+				.orElseThrow(() -> {
+					log.warn("No user found for email: {}", email);
+					 return new NoUserExistsException
+							("Invalid email or password.", ErrorCode.NO_USER_EXISTS);
+				});
 
 		if (!encoder.matches(password, userModel.getPassword())) {
-			throw new InvalidPasswordException("The password entered is invalid. Please try again.");
+			log.warn("Invalid password for email: {}", email);
+			throw new InvalidPasswordException
+					("Invalid email or password.", ErrorCode.INVALID_PASSWORD);
 		}
 
 		ApiResponse apiResponse = new ApiResponse("Login successful.", HttpStatus.OK.value());
+		log.info("User {} signed in successfully", email);
 		return ResponseEntity.ok(apiResponse);
 	}
 
-	public boolean isValidEmail(String email) {
-		String combinedRegex = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
-		Pattern pattern = Pattern.compile(combinedRegex);
-		return pattern.matcher(email).matches();
+	private UserModel convertDtoToModel(UserDTO userDto){
+		return new UserModel(null,userDto.username(),userDto.email(), encoder.encode(userDto.password()));
 	}
 
-	private UserModel convertDtoToModel(UserDTO userDto, boolean encrypt){
-		if(encrypt){
-			return new UserModel(null,userDto.username(),userDto.email(), encoder.encode(userDto.password()));
+	private void isValidEmail(String email) {
+		if(!EMAIL_PATTERN.matcher(email).matches()){
+			throw new InvalidEmailException
+					("The email provided is not valid.", ErrorCode.INVALID_EMAIL);
 		}
-		return new UserModel(null,userDto.username(),userDto.email(),userDto.password());
 	}
+
+	private void ensureUserDoesNotExist(String email){
+		boolean alreadyExists = userRepository.existsByEmail(email);
+		if(alreadyExists){
+			throw new UserAlreadyExistsException
+					("A user with the same email exists.", ErrorCode.USER_ALREADY_EXISTS);
+		}
+	}
+
 }

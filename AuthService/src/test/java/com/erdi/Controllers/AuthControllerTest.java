@@ -2,7 +2,7 @@ package com.erdi.Controllers;
 
 import com.erdi.DTO.LoginRequestDTO;
 import com.erdi.DTO.UserDTO;
-import com.erdi.Models.ApiResponse;
+import com.erdi.DTO.ApiResponse;
 import com.erdi.Services.AuthenticationService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;

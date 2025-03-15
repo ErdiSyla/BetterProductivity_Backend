@@ -2,11 +2,11 @@ package com.erdi.Services;
 
 import com.erdi.DTO.LoginRequestDTO;
 import com.erdi.DTO.UserDTO;
-import com.erdi.Exceptions.InvalidEmailException;
-import com.erdi.Exceptions.InvalidPasswordException;
-import com.erdi.Exceptions.NoUserWithEmailException;
-import com.erdi.Exceptions.UserWithSameEmailException;
-import com.erdi.Models.ApiResponse;
+import com.erdi.Exceptions.Implementation.InvalidEmailException;
+import com.erdi.Exceptions.Implementation.InvalidPasswordException;
+import com.erdi.Exceptions.Implementation.NoUserExistsException;
+import com.erdi.Exceptions.Implementation.UserAlreadyExistsException;
+import com.erdi.DTO.ApiResponse;
 import com.erdi.Models.UserModel;
 import com.erdi.Repositories.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -81,10 +81,10 @@ public class AuthenticationServiceTest {
 	}
 
 	@Test
-	public void AuthenticationService_SignUp_ThrowsUserWithSameEmailExistsExceptionTest(){
+	public void AuthenticationService_SignUp_ThrowsUserAlreadyExistsExceptionTest(){
 		given(userRepository.existsByEmail(testUser.email())).willReturn(true);
 
-		UserWithSameEmailException emailExists = assertThrows(UserWithSameEmailException.class, () -> {
+		UserAlreadyExistsException emailExists = assertThrows(UserAlreadyExistsException.class, () -> {
 			authenticationService.signUp(testUser);
 		});
 
@@ -115,14 +115,14 @@ public class AuthenticationServiceTest {
 	}
 
 	@Test
-	public void AuthenticationService_SignIn_ThrowsNoUserWithEmailExceptionTest(){
+	public void AuthenticationService_SignIn_ThrowsNoUserExistsExceptionTest(){
 
-		NoUserWithEmailException noUser = assertThrows(NoUserWithEmailException.class, () -> {
+		NoUserExistsException noUser = assertThrows(NoUserExistsException.class, () -> {
 			authenticationService.signIn(loginRequestDTO);
 		});
 
 		assertThat(noUser).isNotNull();
-		assertThat(noUser.getMessage()).isEqualTo("There is no existing userModel that holds this email. Please sign up.");
+		assertThat(noUser.getMessage()).isEqualTo("Invalid email or password.");
 		verify(userRepository,times(1)).findUserByEmail(testUser.email());
 	}
 
@@ -136,7 +136,7 @@ public class AuthenticationServiceTest {
 		});
 
 		assertThat(invalidPassword).isNotNull();
-		assertThat(invalidPassword.getMessage()).isEqualTo("The password entered is invalid. Please try again.");
+		assertThat(invalidPassword.getMessage()).isEqualTo("Invalid email or password.");
 		verify(userRepository,times(1)).findUserByEmail(testUser.email());
 		verify(bCryptPasswordEncoder,times(1))
 				.matches(testUserModel.getPassword(), testUser.password());
