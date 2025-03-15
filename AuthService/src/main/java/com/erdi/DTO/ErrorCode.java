@@ -13,6 +13,8 @@ public enum ErrorCode {
         this.code = code;
     }
 
-    public String getCode;
+    public String getCode(){
+        return code;
+    }
 
 }
