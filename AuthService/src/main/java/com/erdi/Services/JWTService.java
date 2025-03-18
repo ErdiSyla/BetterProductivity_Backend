@@ -1,16 +1,20 @@
 package com.erdi.Services;
 
-import com.erdi.Models.ErrorCode;
 import com.erdi.DTO.TokenKeyDTO;
 import com.erdi.Exceptions.Implementation.NoActiveKeysAvailableException;
+import com.erdi.Models.ErrorCode;
+import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Service
@@ -20,7 +24,33 @@ public class JWTService {
 
     private final KafkaConsumerService kafkaConsumerService;
 
-    private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    public String generateToken(String email){
+        Map<String, Object> claims = new HashMap<>();
+
+        TokenKeyDTO tokenKeyDTO = getRandomActiveKey();
+
+        return tokenGenerator(claims,email,tokenKeyDTO);
+    }
+
+    private String tokenGenerator (Map<String, Object> claims,
+                                   String email,TokenKeyDTO tokenKeyDTO){
+        long currentTime =System.currentTimeMillis();
+        long expirationDate = currentTime + 1000L *  60L * 60L
+                * 24L * 7L * 4L;
+
+        return Jwts.builder()
+                .claims().add(claims)
+                .subject(email)
+                .issuedAt(new Date(currentTime))
+                .expiration(new Date(expirationDate))
+                .and()
+                .header()
+                .keyId(tokenKeyDTO.id()+"")
+                .and()
+                .signWith(getPrivateKey(tokenKeyDTO))
+                .compact();
+
+    }
 
     private TokenKeyDTO getRandomActiveKey(){
         List<TokenKeyDTO> activeKeys = kafkaConsumerService.getCachedAuthKeys();
@@ -39,6 +69,19 @@ public class JWTService {
                     return new NoActiveKeysAvailableException
                             ("No active keys available for JWT generation", ErrorCode.JWT_NO_KEYS);
                 });
+    }
+
+    private PrivateKey getPrivateKey(TokenKeyDTO tokenKeyDTO){
+        try{
+            String stringKey = tokenKeyDTO.privateKey();
+            byte[] keyBytes = Base64.getDecoder().decode(stringKey);
+            PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+            return keyFactory.generatePrivate(keySpec);
+        }catch (IllegalArgumentException | NoSuchAlgorithmException | InvalidKeySpecException e) {
+            log.error("Error retrieving private key at {}: {}", Instant.now(), e.getMessage());
+            throw new RuntimeException("Error retrieving private key", e);
+        }
     }
 
 }
