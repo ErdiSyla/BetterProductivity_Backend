@@ -10,9 +10,12 @@ import com.erdi.Exceptions.Implementation.UserAlreadyExistsException;
 import com.erdi.Models.ErrorCode;
 import com.erdi.Models.UserModel;
 import com.erdi.Repositories.UserRepository;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -76,6 +79,18 @@ public class AuthenticationService {
 
 	private UserModel convertDtoToModel(UserDTO userDto){
 		return new UserModel(null,userDto.username(),userDto.email(), encoder.encode(userDto.password()));
+	}
+
+	public void addCookie(HttpServletResponse response, String token){
+		ResponseCookie cookie = ResponseCookie.from("AccessToken",token)
+				.httpOnly(true)
+				.secure(true)
+				.path("/")
+				.maxAge(2419200)
+				.sameSite("Strict")
+				.build();
+
+		response.addHeader(HttpHeaders.SET_COOKIE,cookie.toString());
 	}
 
 	private void isValidEmail(String email) {
