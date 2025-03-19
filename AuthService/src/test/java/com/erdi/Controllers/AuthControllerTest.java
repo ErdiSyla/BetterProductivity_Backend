@@ -1,9 +1,10 @@
 package com.erdi.Controllers;
 
+import com.erdi.DTO.ApiResponse;
 import com.erdi.DTO.LoginRequestDTO;
 import com.erdi.DTO.UserDTO;
-import com.erdi.DTO.ApiResponse;
 import com.erdi.Services.AuthenticationService;
+import com.erdi.Services.JWTService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,6 +40,9 @@ public class AuthControllerTest {
 
 	@Autowired
 	private AuthenticationService mockAuthenticationService;
+
+	@Autowired
+	private JWTService jwtService;
 
 	@Autowired
 	private ObjectMapper objectMapper;
@@ -85,6 +89,11 @@ public class AuthControllerTest {
 		@Bean
 		public AuthenticationService mockAuthenticationService() {
 			return mock(AuthenticationService.class);
+		}
+
+		@Bean
+		public JWTService mockJWTService(){
+			return mock(JWTService.class);
 		}
 	}
 }

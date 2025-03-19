@@ -4,6 +4,8 @@ import com.erdi.DTO.LoginRequestDTO;
 import com.erdi.DTO.UserDTO;
 import com.erdi.DTO.ApiResponse;
 import com.erdi.Services.AuthenticationService;
+import com.erdi.Services.JWTService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,13 +20,19 @@ public class AuthController {
 
 	private final AuthenticationService authenticationService;
 
+	private final JWTService jwtService;
+
 	@PostMapping("/signup")
-	public ResponseEntity<ApiResponse> signUp(@RequestBody UserDTO userDto){
+	public ResponseEntity<ApiResponse> signUp(HttpServletResponse response, @RequestBody UserDTO userDto){
+		String value = jwtService.generateToken(userDto.email());
+		authenticationService.addCookie(response,value);
 		return authenticationService.signUp(userDto);
 	}
 
 	@PostMapping("/signin")
-	public ResponseEntity<ApiResponse> signIn(@RequestBody LoginRequestDTO loginRequestDTO){
+	public ResponseEntity<ApiResponse> signIn(HttpServletResponse response, @RequestBody LoginRequestDTO loginRequestDTO){
+		String value = jwtService.generateToken(loginRequestDTO.email());
+		authenticationService.addCookie(response,value);
 		return authenticationService.signIn(loginRequestDTO);
 	}
 }
