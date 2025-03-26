@@ -1,6 +1,7 @@
 package com.erdi.Services;
 
 import com.erdi.DTO.TokenKeyDTO;
+import com.erdi.Exceptions.Implementation.JWTSigningException;
 import com.erdi.Exceptions.Implementation.NoActiveKeysAvailableException;
 import com.erdi.Models.ErrorCode;
 import io.jsonwebtoken.Jwts;
@@ -80,7 +81,7 @@ public class JWTService {
             return keyFactory.generatePrivate(keySpec);
         }catch (IllegalArgumentException | NoSuchAlgorithmException | InvalidKeySpecException e) {
             log.error("Error retrieving private key at {}: {}", Instant.now(), e.getMessage());
-            throw new RuntimeException("Error retrieving private key", e);
+            throw new JWTSigningException("Error retrieving private key", ErrorCode.JWT_SIGNING,e);
         }
     }
 
