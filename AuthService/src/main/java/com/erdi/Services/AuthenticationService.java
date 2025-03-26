@@ -4,7 +4,7 @@ import com.erdi.DTO.ApiResponse;
 import com.erdi.DTO.LoginRequestDTO;
 import com.erdi.DTO.UserDTO;
 import com.erdi.Exceptions.Implementation.InvalidEmailException;
-import com.erdi.Exceptions.Implementation.InvalidPasswordException;
+import com.erdi.Exceptions.Implementation.InvalidLogInException;
 import com.erdi.Exceptions.Implementation.NoUserExistsException;
 import com.erdi.Exceptions.Implementation.UserAlreadyExistsException;
 import com.erdi.Models.ErrorCode;
@@ -43,7 +43,7 @@ public class AuthenticationService {
 		String email = userDto.email();
 
 		isValidEmail(email);
-		ensureUserDoesNotExist(email);
+		assertUserDoesNotExist(email);
 
 		UserModel userModel = convertDtoToModel(userDto);
 		userRepository.save(userModel);
@@ -67,14 +67,15 @@ public class AuthenticationService {
 				});
 
 		if (!encoder.matches(password, userModel.getPassword())) {
-			log.warn("Invalid password for email: {}", email);
-			throw new InvalidPasswordException
-					("Invalid email or password.", ErrorCode.INVALID_PASSWORD);
+			log.warn("Invalid password for email: {}",email);
+			throw new InvalidLogInException("Invalid email or password.",ErrorCode.INVALID_LOGIN);
 		}
 
-		ApiResponse apiResponse = new ApiResponse("Login successful.", HttpStatus.OK.value());
 		log.info("User {} signed in successfully", email);
-		return ResponseEntity.ok(apiResponse);
+		HttpStatus ok = HttpStatus.OK;
+		return ResponseEntity.status(ok)
+				.body(ApiResponse.builder(
+						"Login successful.",ok.value()));
 	}
 
 	private UserModel convertDtoToModel(UserDTO userDto){
@@ -100,7 +101,7 @@ public class AuthenticationService {
 		}
 	}
 
-	private void ensureUserDoesNotExist(String email){
+	private void assertUserDoesNotExist(String email){
 		boolean alreadyExists = userRepository.existsByEmail(email);
 		if(alreadyExists){
 			throw new UserAlreadyExistsException
@@ -109,3 +110,4 @@ public class AuthenticationService {
 	}
 
 }
+

@@ -3,7 +3,7 @@ package com.erdi.Services;
 import com.erdi.DTO.LoginRequestDTO;
 import com.erdi.DTO.UserDTO;
 import com.erdi.Exceptions.Implementation.InvalidEmailException;
-import com.erdi.Exceptions.Implementation.InvalidPasswordException;
+import com.erdi.Exceptions.Implementation.InvalidLogInException;
 import com.erdi.Exceptions.Implementation.NoUserExistsException;
 import com.erdi.Exceptions.Implementation.UserAlreadyExistsException;
 import com.erdi.DTO.ApiResponse;
@@ -127,11 +127,11 @@ public class AuthenticationServiceTest {
 	}
 
 	@Test
-	public void AuthenticationService_SignIn_ThrowsInvalidPasswordExceptionTest(){
+	public void AuthenticationService_SignIn_ThrowsInvalidLogInExceptionTest(){
 		given(userRepository.findUserByEmail(testUser.email()))
 				.willReturn(Optional.of(testUserModel));
 
-		InvalidPasswordException invalidPassword = assertThrows(InvalidPasswordException.class,() -> {
+		InvalidLogInException invalidPassword = assertThrows(InvalidLogInException.class,() -> {
 			authenticationService.signIn(loginRequestDTO);
 		});
 
