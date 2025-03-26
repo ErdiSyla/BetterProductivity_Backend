@@ -33,4 +33,9 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<String> handleNoActiveKeysAvailableException(NoActiveKeysAvailableException ex){
 		return new ResponseEntity<>(ex.getMessage(), HttpStatus.SERVICE_UNAVAILABLE);
 	}
+
+	@ExceptionHandler(JWTSigningException.class)
+	public ResponseEntity<String> handleJWTSigningException(JWTSigningException ex){
+		return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+	}
 }

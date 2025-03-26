@@ -8,7 +8,8 @@ public enum ErrorCode {
     NO_USER_EXISTS("EMAIL002"),
     USER_ALREADY_EXISTS("EMAIL003"),
     INVALID_PASSWORD("PASSWORD001"),
-    JWT_NO_KEYS("JWT001");
+    JWT_NO_KEYS("JWT001"),
+    JWT_SIGNING("JWT002");
 
     private final String code;
 
