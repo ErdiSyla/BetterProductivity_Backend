@@ -24,8 +24,8 @@ public class GlobalExceptionHandler {
 		return new ResponseEntity<>(ex.getMessage(),HttpStatus.NOT_FOUND);
 	}
 
-	@ExceptionHandler(InvalidPasswordException.class)
-	public ResponseEntity<String> handleInvalidPasswordException(InvalidPasswordException ex){
+	@ExceptionHandler(InvalidLogInException.class)
+	public ResponseEntity<String> handleInvalidLoginException(InvalidLogInException ex){
 		return new ResponseEntity<>(ex.getMessage(),HttpStatus.FORBIDDEN);
 	}
 
