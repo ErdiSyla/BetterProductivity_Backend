@@ -22,7 +22,7 @@ import static org.mockito.Mockito.*;
 
 @Testable
 @ExtendWith(MockitoExtension.class)
-public class KeyManagementServiceTest {
+class KeyManagementServiceTest {
 
     @Mock
     private TokenKeyRepository tokenKeyRepository;
@@ -34,7 +34,7 @@ public class KeyManagementServiceTest {
     private KeyManagementService keyManagementService;
 
     @Test
-    public void KeyManagementService_generateAndStoreKeyPair_SavesKey(){
+    void KeyManagementService_generateAndStoreKeyPair_SavesKey(){
         doNothing().when(kafkaProducerService).sendMessage(anyString(),anyString());
         keyManagementService.generateAndStoreKeyPair();
 
@@ -49,7 +49,7 @@ public class KeyManagementServiceTest {
     }
 
     @Test
-    public void KeyManagementService_findAllActiveKeys_ReturnsActiveKeys(){
+    void KeyManagementService_findAllActiveKeys_ReturnsActiveKeys(){
         List<TokenKeyModel> expectedKeys = Arrays.asList(new TokenKeyModel(), new TokenKeyModel());
         given(tokenKeyRepository.findAllActiveKeys())
                 .willReturn(expectedKeys);
@@ -61,7 +61,7 @@ public class KeyManagementServiceTest {
     }
 
     @Test
-    public void KeyManagementService_findAllKeys_ReturnsKeysTest(){
+    void KeyManagementService_findAllKeys_ReturnsKeysTest(){
         List<TokenKeyModel> expectedKeys = Arrays.asList(new TokenKeyModel(), new TokenKeyModel());
         given(tokenKeyRepository.findAll())
                 .willReturn(expectedKeys);
@@ -73,7 +73,7 @@ public class KeyManagementServiceTest {
     }
 
     @Test
-    public void KeyManagementService_markKeysForRemoval_CallsRepoTest(){
+    void KeyManagementService_markKeysForRemoval_CallsRepoTest(){
         doNothing().when(kafkaProducerService).sendMessage(anyString(),anyString());
         keyManagementService.markKeysForRemoval();
 
@@ -90,7 +90,7 @@ public class KeyManagementServiceTest {
     }
 
     @Test
-    public void KeyManagementService_deleteOldKeys_DeletesTest(){
+    void KeyManagementService_deleteOldKeys_DeletesTest(){
         doNothing().when(kafkaProducerService).sendMessage(anyString(),anyString());
         keyManagementService.deleteOldKeys();
 

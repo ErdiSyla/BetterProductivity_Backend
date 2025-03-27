@@ -23,7 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Testable
 @DataJpaTest
 @AutoConfigureTestDatabase(connection = EmbeddedDatabaseConnection.H2)
-public class TokenKeyRepositoryTest {
+class TokenKeyRepositoryTest {
 
 	@Autowired
 	private EntityManager entityManager;
@@ -34,12 +34,12 @@ public class TokenKeyRepositoryTest {
 	private TokenKeyModel graceTokenKeyModel;
 	private TokenKeyModel oldTokenKeyModel;
 
-	public TokenKeyRepositoryTest(@Autowired TokenKeyRepository tokenKeyRepository){
+	TokenKeyRepositoryTest(@Autowired TokenKeyRepository tokenKeyRepository){
 		this.tokenKeyRepository = tokenKeyRepository;
 	}
 
 	@BeforeEach
-	public void setUp(){
+	void setUp(){
 		activeTokenKeyModel = new TokenKeyModel(null,"test public key","test private key",
 				KeyActivity.ACTIVE, Instant.now());
 		graceTokenKeyModel = new TokenKeyModel(null,"test public key","test private key",
@@ -49,7 +49,7 @@ public class TokenKeyRepositoryTest {
 	}
 
 	@Test
-	public void TokenKeyRepository_Save_ReturnsTokenKeyTest(){
+	void TokenKeyRepository_Save_ReturnsTokenKeyTest(){
 		TokenKeyModel returnedKey = tokenKeyRepository.save(activeTokenKeyModel);
 
 		assertThat(returnedKey).isNotNull();
@@ -62,7 +62,7 @@ public class TokenKeyRepositoryTest {
 	}
 
 	@Test
-	public void TokenKeyRepository_FindById_ReturnsTokenKeyTest() throws Throwable{
+	void TokenKeyRepository_FindById_ReturnsTokenKeyTest() throws Throwable{
 		int keyId = tokenKeyRepository.save(activeTokenKeyModel).getKeyId();
 
 		TokenKeyModel returnedKey = tokenKeyRepository.findById(keyId)
@@ -77,7 +77,7 @@ public class TokenKeyRepositoryTest {
 	}
 
 	@Test
-	public void TokenKeyRepository_DeleteById_ReturnsNothingTest(){
+	void TokenKeyRepository_DeleteById_ReturnsNothingTest(){
 		int keyId = tokenKeyRepository.save(activeTokenKeyModel).getKeyId();
 		tokenKeyRepository.deleteById(keyId);
 
@@ -88,7 +88,7 @@ public class TokenKeyRepositoryTest {
 	}
 
 	@Test
-	public void TokenKeyRepository_DeleteOldKeys_DeletesGraceKeyTest(){
+	void TokenKeyRepository_DeleteOldKeys_DeletesGraceKeyTest(){
 		tokenKeyRepository.save(activeTokenKeyModel);
 		tokenKeyRepository.save(graceTokenKeyModel);
 
@@ -103,7 +103,7 @@ public class TokenKeyRepositoryTest {
 
 	@Transactional
 	@Test
-	public void TokenKeyRepository_UpdateOldKeysToGrace_DeletesGraceKeyTest(){
+	void TokenKeyRepository_UpdateOldKeysToGrace_DeletesGraceKeyTest(){
 		TokenKeyModel returnedTokenKey = tokenKeyRepository.save(oldTokenKeyModel);
         System.out.println(returnedTokenKey.getTimeOfCreation());
         Instant instant = Instant.now()
@@ -127,7 +127,7 @@ public class TokenKeyRepositoryTest {
 
 
 	@Test
-	public void TokenKeyRepository_findAllActiveKeys_ReturnsOnlyActiveKeysTest(){
+	void TokenKeyRepository_findAllActiveKeys_ReturnsOnlyActiveKeysTest(){
 		tokenKeyRepository.save(activeTokenKeyModel);
 		tokenKeyRepository.save(graceTokenKeyModel);
 

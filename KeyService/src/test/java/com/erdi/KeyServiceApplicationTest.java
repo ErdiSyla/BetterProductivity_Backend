@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest(classes = KeyServiceApplication.class)
-public class KeyServiceApplicationTest {
+class KeyServiceApplicationTest {
 
 	@Test
 	void load(){

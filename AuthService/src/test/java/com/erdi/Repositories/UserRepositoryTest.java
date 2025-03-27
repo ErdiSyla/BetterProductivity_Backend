@@ -18,22 +18,22 @@ import static org.assertj.core.api.Assertions.fail;
 @Testable
 @DataJpaTest
 @AutoConfigureTestDatabase(connection = EmbeddedDatabaseConnection.H2)
-public class UserRepositoryTest {
+class UserRepositoryTest {
 
 	private final UserRepository userRepository;
 
 	private UserModel testUserModel1;
 
-	public UserRepositoryTest(@Autowired UserRepository userRepository){
+	UserRepositoryTest(@Autowired UserRepository userRepository){
 		this.userRepository = userRepository;
 	}
 	@BeforeEach
-	public void setUp(){
+	void setUp(){
 		testUserModel1 = new UserModel(null,"Erdi Syla","repotest@gmail.com","test pass");
 	}
 
 	@Test
-	public void UserRepository_Save_ReturnsUserTest(){
+	void UserRepository_Save_ReturnsUserTest(){
 		UserModel user = userRepository.saveAndFlush(testUserModel1);
 
 		assertThat(user).isNotNull();
@@ -44,7 +44,7 @@ public class UserRepositoryTest {
 	}
 
 	@Test
-	public void UserRepository_FindById_ReturnsUserTest() throws Throwable{
+	void UserRepository_FindById_ReturnsUserTest() throws Throwable{
 		int id = userRepository.saveAndFlush(testUserModel1).getId();
 		UserModel returnedUser = userRepository.findById(id)
 						.orElseThrow(Assertions::fail);
@@ -57,7 +57,7 @@ public class UserRepositoryTest {
 	}
 
 	@Test
-	public void UserRepository_DeleteById_ReturnsNothingTest(){
+	void UserRepository_DeleteById_ReturnsNothingTest(){
 		int id = userRepository.saveAndFlush(testUserModel1).getId();
 		userRepository.deleteById(id);
 		Optional<UserModel> deletedUser = userRepository.findById(id);
@@ -67,7 +67,7 @@ public class UserRepositoryTest {
 	}
 
 	@Test
-	public void UserRepository_FindByEmail_ReturnsUserTest(){
+	void UserRepository_FindByEmail_ReturnsUserTest(){
 		String email = userRepository.saveAndFlush(testUserModel1).getEmail();
 		UserModel returnedUser = null;
 		if(userRepository.findUserByEmail(email).isPresent()) {
@@ -84,7 +84,7 @@ public class UserRepositoryTest {
 	}
 
 	@Test
-	public void UserRepository_existsByEmail_ReturnsTrueTest(){
+	void UserRepository_existsByEmail_ReturnsTrueTest(){
 		String email = userRepository.saveAndFlush(testUserModel1).getEmail();
 		boolean userExists = userRepository.existsByEmail(email);
 
@@ -92,7 +92,7 @@ public class UserRepositoryTest {
 	}
 
 	@Test
-	public void UserRepository_existsByEmail_ReturnsFalseTest(){
+	void UserRepository_existsByEmail_ReturnsFalseTest(){
 		userRepository.saveAndFlush(testUserModel1);
 		boolean userExists = userRepository.existsByEmail("notActualUser@gmail.com");
 

@@ -51,14 +51,14 @@ public class AuthControllerTest {
 	private LoginRequestDTO loginRequestDTO;
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		testUser = new UserDTO("Test User", "testUser@gmail.com", "testUserPassword");
 		loginRequestDTO = new LoginRequestDTO(testUser.email(),testUser.password());
 		MockitoAnnotations.openMocks(this);
 	}
 
 	@Test
-	public void AuthController_SignUp_TestReturnsToken() throws Exception {
+	void AuthController_SignUp_TestReturnsToken() throws Exception {
 		ApiResponse response = new ApiResponse("User created successfully.",HttpStatus.CREATED.value());
 		given(mockAuthenticationService.signUp(any(UserDTO.class)))
 				.willReturn(new ResponseEntity<>(response,HttpStatus.CREATED));
@@ -71,7 +71,7 @@ public class AuthControllerTest {
 	}
 
 	@Test
-	public void AuthController_SignIn_TestReturnsToken() throws Exception {
+	void AuthController_SignIn_TestReturnsToken() throws Exception {
 		ApiResponse response = new ApiResponse("Login successful.",HttpStatus.OK.value());
 		given(mockAuthenticationService.signIn(loginRequestDTO))
 				.willReturn(new ResponseEntity<>(response,HttpStatus.OK));
@@ -87,12 +87,12 @@ public class AuthControllerTest {
 	@TestConfiguration
 	static class MockConfig {
 		@Bean
-		public AuthenticationService mockAuthenticationService() {
+		AuthenticationService mockAuthenticationService() {
 			return mock(AuthenticationService.class);
 		}
 
 		@Bean
-		public JWTService mockJWTService(){
+		JWTService mockJWTService(){
 			return mock(JWTService.class);
 		}
 	}

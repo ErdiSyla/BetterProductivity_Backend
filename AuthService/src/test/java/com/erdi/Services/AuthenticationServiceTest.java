@@ -30,7 +30,7 @@ import static org.mockito.Mockito.verify;
 
 @Testable
 @ExtendWith(MockitoExtension.class)
-public class AuthenticationServiceTest {
+class AuthenticationServiceTest {
 
 	@Mock
 	private UserRepository userRepository;
@@ -47,7 +47,7 @@ public class AuthenticationServiceTest {
 	private LoginRequestDTO loginRequestDTO;
 
 	@BeforeEach
-	public void setUp(){
+	void setUp(){
 		testUserModel = new UserModel(1,"User","servicetest@gmail.com","test pass");
 		testUser = new UserDTO("User","servicetest@gmail.com","test pass");
 		invalidUser = new UserDTO("User", "invalidemail","pass");
@@ -55,7 +55,7 @@ public class AuthenticationServiceTest {
 	}
 
 	@Test
-	public void AuthenticationService_SignUp_ReturnsResponseTest(){
+	void AuthenticationService_SignUp_ReturnsResponseTest(){
 		given(userRepository.existsByEmail(testUser.email())).willReturn(false);
 
 		ResponseEntity<ApiResponse> response = authenticationService.signUp(testUser);
@@ -70,7 +70,7 @@ public class AuthenticationServiceTest {
 	}
 
 	@Test
-	public void AuthenticationService_SignUp_ThrowsInvalidEmailExceptionTest(){
+	void AuthenticationService_SignUp_ThrowsInvalidEmailExceptionTest(){
 
 		InvalidEmailException emailException = assertThrows(InvalidEmailException.class, () -> {
 			authenticationService.signUp(invalidUser);
@@ -81,7 +81,7 @@ public class AuthenticationServiceTest {
 	}
 
 	@Test
-	public void AuthenticationService_SignUp_ThrowsUserAlreadyExistsExceptionTest(){
+	void AuthenticationService_SignUp_ThrowsUserAlreadyExistsExceptionTest(){
 		given(userRepository.existsByEmail(testUser.email())).willReturn(true);
 
 		UserAlreadyExistsException emailExists = assertThrows(UserAlreadyExistsException.class, () -> {
@@ -94,7 +94,7 @@ public class AuthenticationServiceTest {
 	}
 
 	@Test
-	public void AuthenticationService_SignIn_ReturnsResponseTest(){
+	void AuthenticationService_SignIn_ReturnsResponseTest(){
 		given(userRepository.findUserByEmail(testUser.email()))
 				.willReturn(Optional.of(testUserModel));
 		given(bCryptPasswordEncoder.matches(testUser.password(),testUserModel.getPassword()))
@@ -115,7 +115,7 @@ public class AuthenticationServiceTest {
 	}
 
 	@Test
-	public void AuthenticationService_SignIn_ThrowsNoUserExistsExceptionTest(){
+	void AuthenticationService_SignIn_ThrowsNoUserExistsExceptionTest(){
 
 		NoUserExistsException noUser = assertThrows(NoUserExistsException.class, () -> {
 			authenticationService.signIn(loginRequestDTO);
@@ -127,7 +127,7 @@ public class AuthenticationServiceTest {
 	}
 
 	@Test
-	public void AuthenticationService_SignIn_ThrowsInvalidLogInExceptionTest(){
+	void AuthenticationService_SignIn_ThrowsInvalidLogInExceptionTest(){
 		given(userRepository.findUserByEmail(testUser.email()))
 				.willReturn(Optional.of(testUserModel));
 
