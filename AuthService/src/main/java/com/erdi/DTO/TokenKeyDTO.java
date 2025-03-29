@@ -1,4 +1,4 @@
 package com.erdi.DTO;
 
-public record TokenKeyDTO (Integer id, String privateKey){
+public record TokenKeyDTO (Integer keyId, String privateKey){
 }
