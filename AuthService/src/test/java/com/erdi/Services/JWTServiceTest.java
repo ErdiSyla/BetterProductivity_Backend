@@ -1,26 +1,31 @@
 package com.erdi.Services;
 
+import com.erdi.DTO.TokenKeyDTO;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwt;
+import io.jsonwebtoken.Jwts;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.platform.commons.annotation.Testable;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.util.Base64;
+import java.util.Collections;
+import java.util.LinkedList;
 
-import static org.mockito.Mockito.mock;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
 
 @Testable
 @ExtendWith(MockitoExtension.class)
-public class JWTServiceTest {
+class JWTServiceTest {
 
-    @Autowired
+    @Mock
     private KafkaConsumerService mockKafkaConsumerService;
 
     @InjectMocks
@@ -41,20 +46,30 @@ public class JWTServiceTest {
         keyPair1PrivateKeyBase64 = Base64.getEncoder()
                 .encodeToString(keyPair1.getPrivate().getEncoded());
         keyPair2PrivateKeyBase64 = Base64.getEncoder()
-                .encodeToString(keyPair2.getPrivate().getEncoded())''
+                .encodeToString(keyPair2.getPrivate().getEncoded());
     }
 
 
     @Test
-    public void JWTService_generateToken_ReturnsResponseTest(){
+    void JWTService_generateToken_ReturnsResponseTest(){
+        TokenKeyDTO tokenKeyDTO = new TokenKeyDTO(1,keyPair1PrivateKeyBase64);
+        given(mockKafkaConsumerService.getCachedAuthKeys())
+                .willReturn(new LinkedList<>(Collections.singletonList(tokenKeyDTO)));
 
+        String email = "user@example.com";
+        String token = jwtService.generateToken(email);
+
+        assertThat(token).isNotNull();
+        assertThat(token).isNotEmpty();
+        assertThat(token).isNotBlank();
+
+        Jwt<?, Claims> parsedToken = Jwts.parser()
+                .verifyWith(keyPair1.getPublic())
+                .build()
+                .parseSignedClaims(token);
+
+        assertThat(email).isEqualTo(parsedToken.getPayload().getSubject());
+        assertThat("1").isEqualTo(parsedToken.getHeader().get("kid"));
     }
 
-    @TestConfiguration
-    static class MockConfig {
-        @Bean
-        public KafkaConsumerService mockKafkaConsumerService() {
-            return mock(KafkaConsumerService.class);
-        }
-    }
 }
