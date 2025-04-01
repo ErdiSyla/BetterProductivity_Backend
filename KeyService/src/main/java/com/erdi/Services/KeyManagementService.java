@@ -1,5 +1,6 @@
 package com.erdi.Services;
 
+import com.erdi.DTO.AuthKeyDTO;
 import com.erdi.DTO.KeyActivity;
 import com.erdi.DTO.TokenKeyDTO;
 import com.erdi.Models.TokenKeyModel;
@@ -26,6 +27,7 @@ public class KeyManagementService {
 
     private final TokenKeyRepository tokenKeyRepository;
     private final KafkaProducerService kafkaProducerService;
+    private final ObjectMapper mapper;
 
     private static final String AUTH_SERVICE_TOPIC = "auth-service-keys";
     private static final String VALIDATION_TOPIC = "validation-keys";
@@ -46,20 +48,7 @@ public class KeyManagementService {
         tokenKeyRepository.saveAndFlush(tokenKey);
         log.info("RSA KeyPair successfully stored in the database.");
 
-        String activeKeysMessage = convertKeysToJson(findAllActiveKeys());
-        String allKeysMessage = convertKeysToJson(findAllKeys());
-
-        kafkaProducerService.sendMessage(AUTH_SERVICE_TOPIC,activeKeysMessage);
-        kafkaProducerService.sendMessage(VALIDATION_TOPIC, allKeysMessage);
-        kafkaProducerService.sendMessage(KEY_CHANGE_TOPIC, "New RSA key pair generated at " + Instant.now());
-    }
-
-
-    public List<TokenKeyModel> findAllActiveKeys(){
-        return tokenKeyRepository.findAllActiveKeys();
-    }
-    public List<TokenKeyModel> findAllKeys(){
-        return tokenKeyRepository.findAll();
+        publishKeyChanges("New RSA key pair generated");
     }
 
     @Transactional
@@ -69,26 +58,14 @@ public class KeyManagementService {
                 .truncatedTo(ChronoUnit.MILLIS);
         tokenKeyRepository.updateOldKeysToGrace(cutoffDate);
         log.info("Marked keys older than {} for removal.", cutoffDate);
-
-        String activeKeysMessage = convertKeysToJson(findAllActiveKeys());
-        String allKeysMessage = convertKeysToJson(findAllKeys());
-
-        kafkaProducerService.sendMessage(AUTH_SERVICE_TOPIC,activeKeysMessage);
-        kafkaProducerService.sendMessage(VALIDATION_TOPIC, allKeysMessage);
-        kafkaProducerService.sendMessage(KEY_CHANGE_TOPIC, "Keys have been marked for removal at " + Instant.now());
+        publishKeyChanges("Keys marked for removal");
     }
 
     @Transactional
     public void deleteOldKeys(){
         tokenKeyRepository.deleteOldKeys();
         log.info("Old keys deleted from the database.");
-
-        String activeKeysMessage = convertKeysToJson(findAllActiveKeys());
-        String allKeysMessage = convertKeysToJson(findAllKeys());
-
-        kafkaProducerService.sendMessage(AUTH_SERVICE_TOPIC,activeKeysMessage);
-        kafkaProducerService.sendMessage(VALIDATION_TOPIC, allKeysMessage);
-        kafkaProducerService.sendMessage(KEY_CHANGE_TOPIC, "Keys deleted at " + Instant.now());
+        publishKeyChanges("Keys deleted");
     }
 
     private KeyPair generateRSAKeyPair(){
@@ -106,16 +83,27 @@ public class KeyManagementService {
         return Base64.getEncoder().encodeToString(key);
     }
 
-    private String convertKeysToJson(List<TokenKeyModel> keys){
+    private String convertTokenKeysToJson(List<TokenKeyModel> keys){
         try{
             List<TokenKeyDTO> DTOs = keys.stream()
                     .map(key -> new TokenKeyDTO(key.getKeyId(), key.getPublicKey(),key.getPrivateKey()))
                         .toList();
-            ObjectMapper mapper = new ObjectMapper();
             return mapper.writeValueAsString(DTOs);
-            }catch (JsonProcessingException e){
-            log.error("JSON conversion failed,applying fallback format" ,e);
+            } catch (JsonProcessingException e){
+            log.error("JSON conversion failed,applying fallback format for TokenKeys" ,e);
             return fallBackKeyFormat(keys);
+        }
+    }
+
+    private String convertAuthKeysToJson(List<TokenKeyModel> keys){
+        try{
+            List<AuthKeyDTO> DTOs = keys.stream()
+                    .map(key -> new AuthKeyDTO(key.getKeyId(),key.getPrivateKey()))
+                    .toList();
+            return mapper.writeValueAsString(DTOs);
+        } catch (JsonProcessingException e) {
+            log.error("JSON conversion failed,applying fallback format for AuthKeys", e);
+            return fallBackAuthKeyFormat(keys);
         }
     }
 
@@ -137,4 +125,36 @@ public class KeyManagementService {
         return sb.toString();
     }
 
+    private String fallBackAuthKeyFormat(List<TokenKeyModel> keys){
+        StringBuilder sb = new StringBuilder("[\n");
+        for(TokenKeyModel key : keys){
+            sb.append("  {\n")
+                    .append("    \"keyId\": ").append(key.getKeyId()).append(",\n")
+                    .append("    \"privateKey\": \"").append(key.getPrivateKey()).append("\",\n")
+                    .append("  },\n");
+        }
+
+        if(!keys.isEmpty()){
+            sb.setLength(sb.length()-2);
+            sb.append("\n");
+        }
+        sb.append("]");
+        return sb.toString();
+    }
+
+    private void publishKeyChanges(String eventDescription){
+        String activeKeysMessage = convertTokenKeysToJson(findAllActiveKeys());
+        String allKeysMessage = convertTokenKeysToJson(findAllKeys());
+        kafkaProducerService.sendMessage(AUTH_SERVICE_TOPIC,activeKeysMessage);
+        kafkaProducerService.sendMessage(VALIDATION_TOPIC, allKeysMessage);
+        kafkaProducerService.sendMessage(KEY_CHANGE_TOPIC, eventDescription + " at " + Instant.now());
+    }
+
+    private List<TokenKeyModel> findAllActiveKeys(){
+        return tokenKeyRepository.findAllActiveKeys();
+    }
+
+    private List<TokenKeyModel> findAllKeys(){
+        return tokenKeyRepository.findAll();
+    }
 }

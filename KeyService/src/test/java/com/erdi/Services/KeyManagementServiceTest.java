@@ -3,21 +3,20 @@ package com.erdi.Services;
 import com.erdi.DTO.KeyActivity;
 import com.erdi.Models.TokenKeyModel;
 import com.erdi.Repositories.TokenKeyRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.platform.commons.annotation.Testable;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 @Testable
@@ -29,6 +28,9 @@ class KeyManagementServiceTest {
 
     @Mock
     private KafkaProducerService kafkaProducerService;
+
+    @Spy
+    private ObjectMapper mapper;
 
     @InjectMocks
     private KeyManagementService keyManagementService;
@@ -46,30 +48,6 @@ class KeyManagementServiceTest {
         assertThat(tokenKeyModel.getPrivateKey()).isNotNull();
         assertThat(tokenKeyModel.getKeyActivity()).isEqualTo(KeyActivity.ACTIVE);
         assertThat(tokenKeyModel.getTimeOfCreation()).isNotNull();
-    }
-
-    @Test
-    void KeyManagementService_findAllActiveKeys_ReturnsActiveKeys(){
-        List<TokenKeyModel> expectedKeys = Arrays.asList(new TokenKeyModel(), new TokenKeyModel());
-        given(tokenKeyRepository.findAllActiveKeys())
-                .willReturn(expectedKeys);
-
-        List<TokenKeyModel> returnedKeys = keyManagementService.findAllActiveKeys();
-
-        assertThat(returnedKeys.size()).isEqualTo(2);
-        verify(tokenKeyRepository,times(1)).findAllActiveKeys();
-    }
-
-    @Test
-    void KeyManagementService_findAllKeys_ReturnsKeysTest(){
-        List<TokenKeyModel> expectedKeys = Arrays.asList(new TokenKeyModel(), new TokenKeyModel());
-        given(tokenKeyRepository.findAll())
-                .willReturn(expectedKeys);
-
-        List<TokenKeyModel> returnedKeys = keyManagementService.findAllKeys();
-
-        assertThat(returnedKeys.size()).isEqualTo(2);
-        verify(tokenKeyRepository,times(1)).findAll();
     }
 
     @Test
@@ -96,5 +74,4 @@ class KeyManagementServiceTest {
 
         verify(tokenKeyRepository,times(1)).deleteOldKeys();
     }
-
 }
