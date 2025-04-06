@@ -10,8 +10,8 @@
   <name>BetterProductivity_Backend</name>
 
   <modules>
-    <module>AuthService</module>
-    <module>KeyService</module>
+    <module>Authentication</module>
+    <module>Key</module>
   </modules>
 
   <properties>
