@@ -4,8 +4,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class KeyServiceApplication {
+public class KeyApplication {
 	public static void main (String[] args){
-		SpringApplication.run(KeyServiceApplication.class);
+		SpringApplication.run(KeyApplication.class);
 	}
 }
