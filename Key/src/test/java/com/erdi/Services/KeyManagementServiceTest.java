@@ -10,7 +10,6 @@ import org.junit.platform.commons.annotation.Testable;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
@@ -29,8 +28,8 @@ class KeyManagementServiceTest {
     @Mock
     private KafkaProducerService kafkaProducerService;
 
-    @Spy
-    private ObjectMapper mapper;
+    @Mock
+    private ObjectMapper objectMapper;
 
     @InjectMocks
     private KeyManagementService keyManagementService;
