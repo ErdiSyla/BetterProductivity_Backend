@@ -60,7 +60,7 @@ class KeyManagementServiceTest {
         System.out.println(cutoffDate);
 
         Instant expectedCutoff = Instant.now()
-                .minus(14, ChronoUnit.DAYS).truncatedTo(ChronoUnit.MILLIS);
+                .minus(13, ChronoUnit.DAYS).truncatedTo(ChronoUnit.MILLIS);
         System.out.println(expectedCutoff);
         long diff = Math.abs(expectedCutoff.toEpochMilli() - cutoffDate.toEpochMilli());
         assertThat(diff).isLessThan(1000);

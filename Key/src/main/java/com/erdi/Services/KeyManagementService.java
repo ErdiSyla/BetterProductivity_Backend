@@ -54,7 +54,7 @@ public class KeyManagementService {
     @Transactional
     public void markKeysForRemoval(){
         Instant cutoffDate = Instant.now()
-                .minus(14, ChronoUnit.DAYS)
+                .minus(13, ChronoUnit.DAYS)
                 .truncatedTo(ChronoUnit.MILLIS);
         tokenKeyRepository.updateOldKeysToGrace(cutoffDate);
         log.info("Marked keys older than {} for removal.", cutoffDate);
@@ -143,7 +143,7 @@ public class KeyManagementService {
     }
 
     private void publishKeyChanges(String eventDescription){
-        String activeKeysMessage = convertTokenKeysToJson(findAllActiveKeys());
+        String activeKeysMessage = convertAuthKeysToJson(findAllActiveKeys());
         String allKeysMessage = convertTokenKeysToJson(findAllKeys());
         kafkaProducerService.sendMessage(AUTH_SERVICE_TOPIC,activeKeysMessage);
         kafkaProducerService.sendMessage(VALIDATION_TOPIC, allKeysMessage);
