@@ -2,10 +2,9 @@ package com.erdi.Repositories;
 
 import com.erdi.DTO.KeyActivity;
 import com.erdi.Models.TokenKeyModel;
-import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.annotation.Testable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,21 +24,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 @AutoConfigureTestDatabase(connection = EmbeddedDatabaseConnection.H2)
 class TokenKeyRepositoryTest {
 
-	@Autowired
-	private EntityManager entityManager;
-
 	private final TokenKeyRepository tokenKeyRepository;
 
-	private TokenKeyModel activeTokenKeyModel;
-	private TokenKeyModel graceTokenKeyModel;
-	private TokenKeyModel oldTokenKeyModel;
+	private static TokenKeyModel activeTokenKeyModel;
+	private static TokenKeyModel graceTokenKeyModel;
+	private static TokenKeyModel oldTokenKeyModel;
 
 	TokenKeyRepositoryTest(@Autowired TokenKeyRepository tokenKeyRepository){
 		this.tokenKeyRepository = tokenKeyRepository;
 	}
 
-	@BeforeEach
-	void setUp(){
+	@BeforeAll
+	static void setUp(){
 		activeTokenKeyModel = new TokenKeyModel(null,"test public key","test private key",
 				KeyActivity.ACTIVE, Instant.now());
 		graceTokenKeyModel = new TokenKeyModel(null,"test public key","test private key",
@@ -103,16 +99,13 @@ class TokenKeyRepositoryTest {
 
 	@Transactional
 	@Test
-	void TokenKeyRepository_UpdateOldKeysToGrace_DeletesGraceKeyTest(){
+	void TokenKeyRepository_UpdateOldKeysToGrace_UpdatesKeyTest(){
 		TokenKeyModel returnedTokenKey = tokenKeyRepository.save(oldTokenKeyModel);
         System.out.println(returnedTokenKey.getTimeOfCreation());
         Instant instant = Instant.now()
                 .minus(14, ChronoUnit.DAYS)
                 .truncatedTo(ChronoUnit.MILLIS);
 		tokenKeyRepository.updateOldKeysToGrace(instant);
-
-		entityManager.flush();
-		entityManager.clear();
 
 		TokenKeyModel updatedTokenKey = tokenKeyRepository.findById(returnedTokenKey.getKeyId()).get();
         System.out.println(updatedTokenKey.getTimeOfCreation());
