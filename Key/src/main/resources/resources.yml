@@ -5,7 +5,7 @@ spring:
   application:
     name: KeyService
   datasource:
-    url: jdbc:postgresql://postgres:5433/KeyService
+    url: ${SPRING_DATASOURCE_URL}
     username: ${SPRING_DATASOURCE_USERNAME}
     password: ${SPRING_DATASOURCE_PASSWORD}
   jpa:
@@ -16,23 +16,3 @@ spring:
     hibernate:
       ddl-auto: validate
     show-sql: true
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health, info, prometheus
-      base-path: /actuator
-  server:
-    port: ${KS_METRICS_PORT:8092}
-  endpoint:
-    prometheus:
-      enabled: true
-    health:
-      probes:
-        enabled: true
-      show-details: always
-  metrics:
-    export:
-      prometheus:
-        enabled: true
