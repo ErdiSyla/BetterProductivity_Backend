@@ -16,3 +16,15 @@ spring:
     hibernate:
       ddl-auto: validate
     show-sql: true
+  kafka:
+    bootstrap-servers: kafka-cluster-kafka-bootstrap.kafka:${KAFKA_PORT}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    properties:
+      security.protocol: SASL_SSL
+      sasl.mechanism: SCRAM-SHA-512
+      sasl.jaas.config: >
+        org.apache.kafka.common.scram.ScramLoginModule required
+        username = "${KAFKA_USERNAME}"
+        password = "${KAFKA_PASSWORD}"
