@@ -29,7 +29,7 @@ public class KeyManagementService {
     private final KafkaProducerService kafkaProducerService;
     private final ObjectMapper mapper;
 
-    private static final String AUTH_SERVICE_TOPIC = "auth-service-keys";
+    private static final String AUTH_SERVICE_TOPIC = "auth-keys";
     private static final String VALIDATION_TOPIC = "validation-keys";
     private static final String KEY_CHANGE_TOPIC = "key-change";
 
