@@ -23,7 +23,7 @@ public class KafkaConsumerService {
 	@Autowired
 	private ObjectMapper objectMapper;
 
-	@KafkaListener(topics = {"auth-service-keys"}, groupId = "${KAFKA_CONSUMER_GROUP_ID}")
+	@KafkaListener(topics = {"auth-keys"}, groupId = "${KAFKA_CONSUMER_GROUP_ID}")
 	public void listenAuthKeys(String message){
 		try {
 			log.info("Received new auth keys : {}", message);
@@ -34,7 +34,8 @@ public class KafkaConsumerService {
 		} catch (JsonProcessingException e){
 			log.error("Failed to parse token keys from message: {}\nError: {}",message,e.getMessage());
 		} catch (Exception e){
-			log.error("Unexpected error while processing auth-service-keys message: {}\nError: {}", message, e.getMessage());
+			log.error("Unexpected error while processing message from auth-keys topic: {}\nError: {}",
+					message, e.getMessage());
 		}
 	}
 
@@ -43,7 +44,7 @@ public class KafkaConsumerService {
 		try{
 			log.info(message);
 		}catch (Exception e){
-			log.error("Error processing key change message: {}\nError:{}",message,e.getMessage());
+			log.error("Error processing message from key-change topic: {}\nError:{}",message,e.getMessage());
 		}
 	}
 
