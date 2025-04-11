@@ -13,8 +13,9 @@ public class KafkaProducerService {
     private final KafkaTemplate<String , String> kafkaTemplate;
 
     public void sendMessage(String topic, String message) {
+        String constantKey = "tokenkeys";
         try{
-            kafkaTemplate.send(topic,message);
+            kafkaTemplate.send(topic,constantKey,message);
             log.info("Message sent to topic {} successfully.", topic);
         }catch (Exception e){
             log.error("Error sending message to Kafka topic {}: {}", topic, e.getMessage());
