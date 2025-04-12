@@ -32,6 +32,9 @@ management:
       probes:
         enabled: true
       show-details: always
+      group:
+        readiness:
+          include: db, diskSpace, ping
   metrics:
     export:
       prometheus:
