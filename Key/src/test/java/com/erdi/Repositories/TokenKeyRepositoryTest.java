@@ -4,13 +4,15 @@ import com.erdi.DTO.KeyActivity;
 import com.erdi.Models.TokenKeyModel;
 import jakarta.transaction.Transactional;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.platform.commons.annotation.Testable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.jdbc.EmbeddedDatabaseConnection;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -21,21 +23,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @Testable
 @DataJpaTest
+@ExtendWith(SpringExtension.class)
 @AutoConfigureTestDatabase(connection = EmbeddedDatabaseConnection.H2)
-class TokenKeyRepositoryTest {
+public class TokenKeyRepositoryTest {
 
-	private final TokenKeyRepository tokenKeyRepository;
+	@Autowired
+	private TokenKeyRepository tokenKeyRepository;
 
-	private static TokenKeyModel activeTokenKeyModel;
-	private static TokenKeyModel graceTokenKeyModel;
-	private static TokenKeyModel oldTokenKeyModel;
+	private TokenKeyModel activeTokenKeyModel;
+	private TokenKeyModel graceTokenKeyModel;
+	private TokenKeyModel oldTokenKeyModel;
 
-	TokenKeyRepositoryTest(@Autowired TokenKeyRepository tokenKeyRepository){
-		this.tokenKeyRepository = tokenKeyRepository;
-	}
-
-	@BeforeAll
-	static void setUp(){
+	@BeforeEach
+	void setUp(){
 		activeTokenKeyModel = new TokenKeyModel(null,"test public key","test private key",
 				KeyActivity.ACTIVE, Instant.now());
 		graceTokenKeyModel = new TokenKeyModel(null,"test public key","test private key",

@@ -12,6 +12,7 @@ import com.erdi.Models.UserModel;
 import com.erdi.Repositories.UserRepository;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -24,6 +25,7 @@ import java.util.regex.Pattern;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class AuthenticationService {
 
 	private final UserRepository userRepository;
@@ -32,11 +34,6 @@ public class AuthenticationService {
 
 	private static final Pattern EMAIL_PATTERN =
 			Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
-
-	public AuthenticationService(UserRepository userRepository, BCryptPasswordEncoder encoder){
-		this.userRepository = userRepository;
-		this.encoder = encoder;
-	}
 
 	@Transactional
 	public ResponseEntity<ApiResponse> signUp(UserDTO userDto) {

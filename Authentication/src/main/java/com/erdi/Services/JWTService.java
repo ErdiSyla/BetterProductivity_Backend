@@ -19,8 +19,8 @@ import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
+@RequiredArgsConstructor
 public class JWTService {
 
     private final KafkaConsumerService kafkaConsumerService;
