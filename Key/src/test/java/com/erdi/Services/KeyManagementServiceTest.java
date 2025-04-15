@@ -36,7 +36,7 @@ class KeyManagementServiceTest {
 
     @Test
     void KeyManagementService_generateAndStoreKeyPair_SavesKey(){
-        doNothing().when(kafkaProducerService).sendMessage(anyString(),anyString());
+        doNothing().when(kafkaProducerService).sendMessage(anyString(),isNull());
         keyManagementService.generateAndStoreKeyPair();
 
         ArgumentCaptor<TokenKeyModel> captor = ArgumentCaptor.forClass(TokenKeyModel.class);
@@ -51,7 +51,7 @@ class KeyManagementServiceTest {
 
     @Test
     void KeyManagementService_markKeysForRemoval_CallsRepoTest(){
-        doNothing().when(kafkaProducerService).sendMessage(anyString(),anyString());
+        doNothing().when(kafkaProducerService).sendMessage(anyString(),isNull());
         keyManagementService.markKeysForRemoval();
 
         ArgumentCaptor<Instant> captor = ArgumentCaptor.forClass(Instant.class);
@@ -68,7 +68,7 @@ class KeyManagementServiceTest {
 
     @Test
     void KeyManagementService_deleteOldKeys_DeletesTest(){
-        doNothing().when(kafkaProducerService).sendMessage(anyString(),anyString());
+        doNothing().when(kafkaProducerService).sendMessage(anyString(),isNull());
         keyManagementService.deleteOldKeys();
 
         verify(tokenKeyRepository,times(1)).deleteOldKeys();
