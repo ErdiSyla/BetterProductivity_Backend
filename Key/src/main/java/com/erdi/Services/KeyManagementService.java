@@ -11,7 +11,6 @@ import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.security.KeyPair;
@@ -29,10 +28,8 @@ public class KeyManagementService {
 
     private final TokenKeyRepository tokenKeyRepository;
     private final KafkaProducerService kafkaProducerService;
-    @Autowired
-    private ObjectMapper mapper;
-    @Autowired
-    private EntityManager entityManager;
+    private final ObjectMapper mapper;
+    private final EntityManager entityManager;
 
     private static final String AUTH_SERVICE_TOPIC = "auth-keys";
     private static final String VALIDATION_TOPIC = "validation-keys";

@@ -4,6 +4,7 @@ import com.erdi.DTO.KeyActivity;
 import com.erdi.Models.TokenKeyModel;
 import com.erdi.Repositories.TokenKeyRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.platform.commons.annotation.Testable;
@@ -29,7 +30,10 @@ class KeyManagementServiceTest {
     private KafkaProducerService kafkaProducerService;
 
     @Mock
-    private ObjectMapper objectMapper;
+    private ObjectMapper mapper;
+
+    @Mock
+    private EntityManager entityManager;
 
     @InjectMocks
     private KeyManagementService keyManagementService;
