@@ -12,6 +12,7 @@
   <modules>
     <module>Authentication</module>
     <module>Key</module>
+      <module>ApiGateway</module>
   </modules>
 
   <properties>
