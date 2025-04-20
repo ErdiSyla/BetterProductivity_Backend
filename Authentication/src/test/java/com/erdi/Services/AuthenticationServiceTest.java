@@ -9,6 +9,7 @@ import com.erdi.Exceptions.Implementation.UserAlreadyExistsException;
 import com.erdi.DTO.ApiResponse;
 import com.erdi.Models.UserModel;
 import com.erdi.Repositories.UserRepository;
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,8 +26,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @Testable
 @ExtendWith(MockitoExtension.class)
@@ -34,6 +34,9 @@ class AuthenticationServiceTest {
 
 	@Mock
 	private UserRepository userRepository;
+
+	@Mock
+	private JWTService jwtService;
 
 	@Mock
 	private BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -45,6 +48,7 @@ class AuthenticationServiceTest {
 	private UserDTO testUser;
 	private UserDTO invalidUser;
 	private LoginRequestDTO loginRequestDTO;
+	private HttpServletResponse httpResponse;
 
 	@BeforeEach
 	void setUp(){
@@ -52,13 +56,14 @@ class AuthenticationServiceTest {
 		testUser = new UserDTO("User","servicetest@gmail.com","test pass");
 		invalidUser = new UserDTO("User", "invalidemail","pass");
 		loginRequestDTO = new LoginRequestDTO(testUser.email(),testUser.password());
+		httpResponse = mock(HttpServletResponse.class);
 	}
 
 	@Test
 	void AuthenticationService_SignUp_ReturnsResponseTest(){
 		given(userRepository.existsByEmail(testUser.email())).willReturn(false);
 
-		ResponseEntity<ApiResponse> response = authenticationService.signUp(testUser);
+		ResponseEntity<ApiResponse> response = authenticationService.signUp(httpResponse,testUser);
 
 		assertThat(response).isNotNull();
 		assertThat(response.getBody().message()).isEqualTo("User created successfully.");
@@ -73,7 +78,7 @@ class AuthenticationServiceTest {
 	void AuthenticationService_SignUp_ThrowsInvalidEmailExceptionTest(){
 
 		InvalidEmailException emailException = assertThrows(InvalidEmailException.class, () -> {
-			authenticationService.signUp(invalidUser);
+			authenticationService.signUp(httpResponse,invalidUser);
 		});
 
 		assertThat(emailException).isNotNull();
@@ -85,7 +90,7 @@ class AuthenticationServiceTest {
 		given(userRepository.existsByEmail(testUser.email())).willReturn(true);
 
 		UserAlreadyExistsException emailExists = assertThrows(UserAlreadyExistsException.class, () -> {
-			authenticationService.signUp(testUser);
+			authenticationService.signUp(httpResponse,testUser);
 		});
 
 		assertThat(emailExists).isNotNull();
@@ -101,7 +106,7 @@ class AuthenticationServiceTest {
 				.willReturn(true);
 
 		ResponseEntity<ApiResponse> response = authenticationService
-				.signIn(loginRequestDTO);
+				.signIn(httpResponse,loginRequestDTO);
 
 		assertThat(response).isNotNull();
 		assertThat(response.getBody().message()).isEqualTo("Login successful.");
@@ -118,7 +123,7 @@ class AuthenticationServiceTest {
 	void AuthenticationService_SignIn_ThrowsNoUserExistsExceptionTest(){
 
 		NoUserExistsException noUser = assertThrows(NoUserExistsException.class, () -> {
-			authenticationService.signIn(loginRequestDTO);
+			authenticationService.signIn(httpResponse,loginRequestDTO);
 		});
 
 		assertThat(noUser).isNotNull();
@@ -132,7 +137,7 @@ class AuthenticationServiceTest {
 				.willReturn(Optional.of(testUserModel));
 
 		InvalidLogInException invalidPassword = assertThrows(InvalidLogInException.class,() -> {
-			authenticationService.signIn(loginRequestDTO);
+			authenticationService.signIn(httpResponse,loginRequestDTO);
 		});
 
 		assertThat(invalidPassword).isNotNull();

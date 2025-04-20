@@ -14,9 +14,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -35,8 +33,11 @@ public class AuthenticationService {
 	private static final Pattern EMAIL_PATTERN =
 			Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
 
+	private final JWTService jwtService;
+
 	@Transactional
-	public ResponseEntity<ApiResponse> signUp(UserDTO userDto) {
+	public ResponseEntity<ApiResponse> signUp(HttpServletResponse response,
+											  UserDTO userDto) {
 		String email = userDto.email();
 
 		isValidEmail(email);
@@ -45,6 +46,9 @@ public class AuthenticationService {
 		UserModel userModel = convertDtoToModel(userDto);
 		userRepository.save(userModel);
 
+		String token = jwtService.generateToken(email);
+		jwtService.addCookie(response,email);
+
 		log.info("User with email: {} created successfully", email);
 		HttpStatus created = HttpStatus.CREATED;
 		return ResponseEntity.status(created)
@@ -52,7 +56,8 @@ public class AuthenticationService {
 						,created.value()));
 	}
 
-	public ResponseEntity<ApiResponse> signIn(LoginRequestDTO loginRequestDTO) {
+	public ResponseEntity<ApiResponse> signIn(HttpServletResponse response,
+											  LoginRequestDTO loginRequestDTO) {
 		String email = loginRequestDTO.email();
 		String password = loginRequestDTO.password();
 
@@ -70,6 +75,10 @@ public class AuthenticationService {
 
 		log.info("User {} signed in successfully", email);
 		HttpStatus ok = HttpStatus.OK;
+
+		String token = jwtService.generateToken(email);
+		jwtService.addCookie(response,token);
+
 		return ResponseEntity.status(ok)
 				.body(ApiResponse.builder(
 						"Login successful.",ok.value()));
@@ -77,18 +86,6 @@ public class AuthenticationService {
 
 	private UserModel convertDtoToModel(UserDTO userDto){
 		return new UserModel(null,userDto.username(),userDto.email(), encoder.encode(userDto.password()));
-	}
-
-	public void addCookie(HttpServletResponse response, String token){
-		ResponseCookie cookie = ResponseCookie.from("AccessToken",token)
-				.httpOnly(true)
-				.secure(true)
-				.path("/")
-				.maxAge(2419200)
-				.sameSite("Strict")
-				.build();
-
-		response.addHeader(HttpHeaders.SET_COOKIE,cookie.toString());
 	}
 
 	private void isValidEmail(String email) {
