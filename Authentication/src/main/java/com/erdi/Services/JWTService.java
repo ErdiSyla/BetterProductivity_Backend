@@ -5,8 +5,11 @@ import com.erdi.Exceptions.Implementation.JWTSigningException;
 import com.erdi.Exceptions.Implementation.NoActiveKeysAvailableException;
 import com.erdi.Models.ErrorCode;
 import io.jsonwebtoken.Jwts;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
 
 import java.security.KeyFactory;
@@ -83,6 +86,18 @@ public class JWTService {
             log.error("Error retrieving private key at {}: {}", Instant.now(), e.getMessage());
             throw new JWTSigningException("Error retrieving private key", ErrorCode.JWT_SIGNING,e);
         }
+    }
+
+    public void addCookie(HttpServletResponse response, String token){
+        ResponseCookie cookie = ResponseCookie.from("AccessToken",token)
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(2419200)
+                .sameSite("Strict")
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE,cookie.toString());
     }
 
 }
