@@ -40,7 +40,7 @@ public class JWTService {
                                    String email,TokenKeyDTO tokenKeyDTO){
         long currentTime =System.currentTimeMillis();
         long expirationDate = currentTime + 1000L *  60L * 60L
-                * 24L * 7L * 4L;
+                * 24L * 7L * 2L;
 
         return Jwts.builder()
                 .claims().add(claims)
