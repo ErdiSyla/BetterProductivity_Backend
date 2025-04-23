@@ -47,7 +47,7 @@ public class AuthenticationService {
 		userRepository.save(userModel);
 
 		String token = jwtService.generateToken(email);
-		jwtService.addCookie(response,email);
+		jwtService.addCookie(response,token);
 
 		log.info("User with email: {} created successfully", email);
 		HttpStatus created = HttpStatus.CREATED;
