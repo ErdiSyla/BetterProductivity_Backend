@@ -69,9 +69,9 @@ public class AuthControllerTest {
 	}
 
 	@Test
-	void AuthController_SignIn_TestReturnsToken() throws Exception {
+	void AuthController_LogIn_TestReturnsToken() throws Exception {
 		ApiResponse response = new ApiResponse("Login successful.",HttpStatus.OK.value());
-		given(mockAuthenticationService.signIn(any(HttpServletResponse.class)
+		given(mockAuthenticationService.logIn(any(HttpServletResponse.class)
 				,any(LoginRequestDTO.class)))
 				.willReturn(new ResponseEntity<>(response,HttpStatus.OK));
 

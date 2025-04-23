@@ -24,8 +24,8 @@ public class AuthController {
 		return authenticationService.signUp(response,userDto);
 	}
 
-	@PostMapping("/signin")
-	public ResponseEntity<ApiResponse> signIn(HttpServletResponse response, @RequestBody LoginRequestDTO loginRequestDTO){
-		return authenticationService.signIn(response,loginRequestDTO);
+	@PostMapping("/login")
+	public ResponseEntity<ApiResponse> logIn(HttpServletResponse response, @RequestBody LoginRequestDTO loginRequestDTO){
+		return authenticationService.logIn(response,loginRequestDTO);
 	}
 }

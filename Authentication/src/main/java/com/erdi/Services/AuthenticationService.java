@@ -56,8 +56,8 @@ public class AuthenticationService {
 						,created.value()));
 	}
 
-	public ResponseEntity<ApiResponse> signIn(HttpServletResponse response,
-											  LoginRequestDTO loginRequestDTO) {
+	public ResponseEntity<ApiResponse> logIn(HttpServletResponse response,
+											 LoginRequestDTO loginRequestDTO) {
 		String email = loginRequestDTO.email();
 		String password = loginRequestDTO.password();
 

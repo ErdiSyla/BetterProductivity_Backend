@@ -99,14 +99,14 @@ class AuthenticationServiceTest {
 	}
 
 	@Test
-	void AuthenticationService_SignIn_ReturnsResponseTest(){
+	void AuthenticationService_LogIn_ReturnsResponseTest(){
 		given(userRepository.findUserByEmail(testUser.email()))
 				.willReturn(Optional.of(testUserModel));
 		given(bCryptPasswordEncoder.matches(testUser.password(),testUserModel.getPassword()))
 				.willReturn(true);
 
 		ResponseEntity<ApiResponse> response = authenticationService
-				.signIn(httpResponse,loginRequestDTO);
+				.logIn(httpResponse,loginRequestDTO);
 
 		assertThat(response).isNotNull();
 		assertThat(response.getBody().message()).isEqualTo("Login successful.");
@@ -120,10 +120,10 @@ class AuthenticationServiceTest {
 	}
 
 	@Test
-	void AuthenticationService_SignIn_ThrowsNoUserExistsExceptionTest(){
+	void AuthenticationService_LogIn_ThrowsNoUserExistsExceptionTest(){
 
 		NoUserExistsException noUser = assertThrows(NoUserExistsException.class, () -> {
-			authenticationService.signIn(httpResponse,loginRequestDTO);
+			authenticationService.logIn(httpResponse,loginRequestDTO);
 		});
 
 		assertThat(noUser).isNotNull();
@@ -132,12 +132,12 @@ class AuthenticationServiceTest {
 	}
 
 	@Test
-	void AuthenticationService_SignIn_ThrowsInvalidLogInExceptionTest(){
+	void AuthenticationService_LogIn_ThrowsInvalidLogInExceptionTest(){
 		given(userRepository.findUserByEmail(testUser.email()))
 				.willReturn(Optional.of(testUserModel));
 
 		InvalidLogInException invalidPassword = assertThrows(InvalidLogInException.class,() -> {
-			authenticationService.signIn(httpResponse,loginRequestDTO);
+			authenticationService.logIn(httpResponse,loginRequestDTO);
 		});
 
 		assertThat(invalidPassword).isNotNull();
