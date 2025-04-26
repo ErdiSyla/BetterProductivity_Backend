@@ -75,7 +75,7 @@ public class AuthControllerTest {
 				,any(LoginRequestDTO.class)))
 				.willReturn(new ResponseEntity<>(response,HttpStatus.OK));
 
-		mockMvc.perform(post("/auth/signin")
+		mockMvc.perform(post("/auth/login")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(loginRequestDTO)))
 				.andExpect(status().isOk())

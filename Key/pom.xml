@@ -4,13 +4,17 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>Key</artifactId>
+    <name>Key</name>
 
     <parent>
         <groupId>com.erdi</groupId>
         <artifactId>BetterProductivity_Backend</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
+
+    <artifactId>Key</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
 
     <dependencies>
 
@@ -60,11 +64,4 @@
             <artifactId>micrometer-registry-prometheus</artifactId>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-
-        </plugins>
-    </build>
-
 </project>
