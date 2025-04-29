@@ -30,7 +30,7 @@ import static org.mockito.Mockito.*;
 
 @Testable
 @ExtendWith(MockitoExtension.class)
-class AuthenticationServiceTest {
+class UserServiceTest {
 
 	@Mock
 	private UserRepository userRepository;
@@ -42,7 +42,7 @@ class AuthenticationServiceTest {
 	private BCryptPasswordEncoder bCryptPasswordEncoder;
 
 	@InjectMocks
-	private AuthenticationService authenticationService;
+	private UserService userService;
 
 	private UserModel testUserModel;
 	private UserDTO testUser;
@@ -63,7 +63,7 @@ class AuthenticationServiceTest {
 	void AuthenticationService_SignUp_ReturnsResponseTest(){
 		given(userRepository.existsByEmail(testUser.email())).willReturn(false);
 
-		ResponseEntity<ApiResponse> response = authenticationService.signUp(httpResponse,testUser);
+		ResponseEntity<ApiResponse> response = userService.signUp(httpResponse,testUser);
 
 		assertThat(response).isNotNull();
 		assertThat(response.getBody().message()).isEqualTo("User created successfully.");
@@ -78,7 +78,7 @@ class AuthenticationServiceTest {
 	void AuthenticationService_SignUp_ThrowsInvalidEmailExceptionTest(){
 
 		InvalidEmailException emailException = assertThrows(InvalidEmailException.class, () -> {
-			authenticationService.signUp(httpResponse,invalidUser);
+			userService.signUp(httpResponse,invalidUser);
 		});
 
 		assertThat(emailException).isNotNull();
@@ -90,7 +90,7 @@ class AuthenticationServiceTest {
 		given(userRepository.existsByEmail(testUser.email())).willReturn(true);
 
 		UserAlreadyExistsException emailExists = assertThrows(UserAlreadyExistsException.class, () -> {
-			authenticationService.signUp(httpResponse,testUser);
+			userService.signUp(httpResponse,testUser);
 		});
 
 		assertThat(emailExists).isNotNull();
@@ -105,7 +105,7 @@ class AuthenticationServiceTest {
 		given(bCryptPasswordEncoder.matches(testUser.password(),testUserModel.getPassword()))
 				.willReturn(true);
 
-		ResponseEntity<ApiResponse> response = authenticationService
+		ResponseEntity<ApiResponse> response = userService
 				.logIn(httpResponse,loginRequestDTO);
 
 		assertThat(response).isNotNull();
@@ -123,7 +123,7 @@ class AuthenticationServiceTest {
 	void AuthenticationService_LogIn_ThrowsNoUserExistsExceptionTest(){
 
 		NoUserExistsException noUser = assertThrows(NoUserExistsException.class, () -> {
-			authenticationService.logIn(httpResponse,loginRequestDTO);
+			userService.logIn(httpResponse,loginRequestDTO);
 		});
 
 		assertThat(noUser).isNotNull();
@@ -137,7 +137,7 @@ class AuthenticationServiceTest {
 				.willReturn(Optional.of(testUserModel));
 
 		InvalidLogInException invalidPassword = assertThrows(InvalidLogInException.class,() -> {
-			authenticationService.logIn(httpResponse,loginRequestDTO);
+			userService.logIn(httpResponse,loginRequestDTO);
 		});
 
 		assertThat(invalidPassword).isNotNull();
