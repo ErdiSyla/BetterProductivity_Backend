@@ -60,7 +60,7 @@ class UserServiceTest {
 	}
 
 	@Test
-	void AuthenticationService_SignUp_ReturnsResponseTest(){
+	void UserService_SignUp_ReturnsResponseTest(){
 		given(userRepository.existsByEmail(testUser.email())).willReturn(false);
 
 		ResponseEntity<ApiResponse> response = userService.signUp(httpResponse,testUser);
@@ -75,7 +75,7 @@ class UserServiceTest {
 	}
 
 	@Test
-	void AuthenticationService_SignUp_ThrowsInvalidEmailExceptionTest(){
+	void UserService_SignUp_ThrowsInvalidEmailExceptionTest(){
 
 		InvalidEmailException emailException = assertThrows(InvalidEmailException.class, () -> {
 			userService.signUp(httpResponse,invalidUser);
@@ -86,7 +86,7 @@ class UserServiceTest {
 	}
 
 	@Test
-	void AuthenticationService_SignUp_ThrowsUserAlreadyExistsExceptionTest(){
+	void UserService_SignUp_ThrowsUserAlreadyExistsExceptionTest(){
 		given(userRepository.existsByEmail(testUser.email())).willReturn(true);
 
 		UserAlreadyExistsException emailExists = assertThrows(UserAlreadyExistsException.class, () -> {
@@ -99,7 +99,7 @@ class UserServiceTest {
 	}
 
 	@Test
-	void AuthenticationService_LogIn_ReturnsResponseTest(){
+	void UserService_LogIn_ReturnsResponseTest(){
 		given(userRepository.findUserByEmail(testUser.email()))
 				.willReturn(Optional.of(testUserModel));
 		given(bCryptPasswordEncoder.matches(testUser.password(),testUserModel.getPassword()))
@@ -120,7 +120,7 @@ class UserServiceTest {
 	}
 
 	@Test
-	void AuthenticationService_LogIn_ThrowsNoUserExistsExceptionTest(){
+	void UserService_LogIn_ThrowsNoUserExistsExceptionTest(){
 
 		NoUserExistsException noUser = assertThrows(NoUserExistsException.class, () -> {
 			userService.logIn(httpResponse,loginRequestDTO);
@@ -132,7 +132,7 @@ class UserServiceTest {
 	}
 
 	@Test
-	void AuthenticationService_LogIn_ThrowsInvalidLogInExceptionTest(){
+	void UserService_LogIn_ThrowsInvalidLogInExceptionTest(){
 		given(userRepository.findUserByEmail(testUser.email()))
 				.willReturn(Optional.of(testUserModel));
 

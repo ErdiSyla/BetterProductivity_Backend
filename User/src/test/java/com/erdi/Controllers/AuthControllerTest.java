@@ -3,7 +3,7 @@ package com.erdi.Controllers;
 import com.erdi.DTO.ApiResponse;
 import com.erdi.DTO.LoginRequestDTO;
 import com.erdi.DTO.UserDTO;
-import com.erdi.Services.AuthenticationService;
+import com.erdi.Services.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,7 +39,7 @@ public class AuthControllerTest {
 	private MockMvc mockMvc;
 
 	@Autowired
-	private AuthenticationService mockAuthenticationService;
+	private UserService mockUserService;
 
 	@Autowired
 	private ObjectMapper objectMapper;
@@ -57,7 +57,7 @@ public class AuthControllerTest {
 	@Test
 	void AuthController_SignUp_TestReturnsToken() throws Exception {
 		ApiResponse response = new ApiResponse("User created successfully.",HttpStatus.CREATED.value());
-		given(mockAuthenticationService.signUp(any(HttpServletResponse.class)
+		given(mockUserService.signUp(any(HttpServletResponse.class)
 				,any(UserDTO.class)))
 				.willReturn(new ResponseEntity<>(response,HttpStatus.CREATED));
 
@@ -71,7 +71,7 @@ public class AuthControllerTest {
 	@Test
 	void AuthController_LogIn_TestReturnsToken() throws Exception {
 		ApiResponse response = new ApiResponse("Login successful.",HttpStatus.OK.value());
-		given(mockAuthenticationService.logIn(any(HttpServletResponse.class)
+		given(mockUserService.logIn(any(HttpServletResponse.class)
 				,any(LoginRequestDTO.class)))
 				.willReturn(new ResponseEntity<>(response,HttpStatus.OK));
 
@@ -86,8 +86,8 @@ public class AuthControllerTest {
 	@TestConfiguration
 	static class MockConfig {
 		@Bean
-		AuthenticationService mockAuthenticationService() {
-			return mock(AuthenticationService.class);
+        UserService mockUserService() {
+			return mock(UserService.class);
 		}
 	}
 }
