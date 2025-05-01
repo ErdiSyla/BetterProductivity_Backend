@@ -2,8 +2,8 @@
 
 	import org.springframework.context.annotation.Bean;
 	import org.springframework.context.annotation.Configuration;
-	import org.springframework.security.User.UserManager;
-	import org.springframework.security.config.annotation.User.configuration.UserConfiguration;
+	import org.springframework.security.authentication.AuthenticationManager;
+	import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 	import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 	import org.springframework.security.config.http.SessionCreationPolicy;
 	import org.springframework.security.web.SecurityFilterChain;
@@ -12,8 +12,8 @@
 	public class SecurityConfig {
 
 		@Bean
-		public UserManager UserManager(UserConfiguration UserConfiguration) throws Exception{
-			return UserConfiguration.getUserManager();
+		public AuthenticationManager authenticationManager(AuthenticationConfiguration authconfig) throws Exception{
+			return authconfig.getAuthenticationManager();
 		}
 
 		@Bean
