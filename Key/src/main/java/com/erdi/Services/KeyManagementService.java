@@ -1,6 +1,6 @@
 package com.erdi.Services;
 
-import com.erdi.DTO.AuthKeyDTO;
+import com.erdi.DTO.CustomerKeyDTO;
 import com.erdi.DTO.KeyActivity;
 import com.erdi.DTO.TokenKeyDTO;
 import com.erdi.Models.TokenKeyModel;
@@ -31,7 +31,7 @@ public class KeyManagementService {
     private final ObjectMapper mapper;
     private final EntityManager entityManager;
 
-    private static final String AUTH_SERVICE_TOPIC = "auth-keys";
+    private static final String CUSTOMER_TOPIC = "customer-keys";
     private static final String VALIDATION_TOPIC = "validation-keys";
     private static final String KEY_CHANGE_TOPIC = "key-change";
 
@@ -100,15 +100,15 @@ public class KeyManagementService {
         }
     }
 
-    private String convertAuthKeysToJson(List<TokenKeyModel> keys){
+    private String convertCustomerKeysToJson(List<TokenKeyModel> keys){
         try{
-            List<AuthKeyDTO> DTOs = keys.stream()
-                    .map(key -> new AuthKeyDTO(key.getKeyId(),key.getPrivateKey()))
+            List<CustomerKeyDTO> DTOs = keys.stream()
+                    .map(key -> new CustomerKeyDTO(key.getKeyId(),key.getPrivateKey()))
                     .toList();
             return mapper.writeValueAsString(DTOs);
         } catch (JsonProcessingException e) {
-            log.error("JSON conversion failed,applying fallback format for AuthKeys", e);
-            return fallBackAuthKeyFormat(keys);
+            log.error("JSON conversion failed,applying fallback format for customer keys", e);
+            return fallBackCustomerKeyFormat(keys);
         }
     }
 
@@ -130,7 +130,7 @@ public class KeyManagementService {
         return sb.toString();
     }
 
-    private String fallBackAuthKeyFormat(List<TokenKeyModel> keys){
+    private String fallBackCustomerKeyFormat(List<TokenKeyModel> keys){
         StringBuilder sb = new StringBuilder("[\n");
         for(TokenKeyModel key : keys){
             sb.append("  {\n")
@@ -148,9 +148,9 @@ public class KeyManagementService {
     }
 
     private void publishKeyChanges(String eventDescription){
-        String activeKeysMessage = convertAuthKeysToJson(findAllActiveKeys());
+        String activeKeysMessage = convertCustomerKeysToJson(findAllActiveKeys());
         String allKeysMessage = convertTokenKeysToJson(findAllKeys());
-        kafkaProducerService.sendMessage(AUTH_SERVICE_TOPIC,activeKeysMessage);
+        kafkaProducerService.sendMessage(CUSTOMER_TOPIC,activeKeysMessage);
         kafkaProducerService.sendMessage(VALIDATION_TOPIC, allKeysMessage);
         kafkaProducerService.sendMessage(KEY_CHANGE_TOPIC, eventDescription + " at " + Instant.now());
     }

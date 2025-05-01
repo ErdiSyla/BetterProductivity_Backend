@@ -13,7 +13,7 @@
 
   <modules>
     <module>ApiGateway</module>
-    <module>User</module>
+    <module>Customer</module>
     <module>Key</module>
   </modules>
 

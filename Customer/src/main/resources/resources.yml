@@ -1,0 +1,55 @@
+server:
+  port: ${CS_PORT:8080}
+
+spring:
+  application:
+    name: Customer
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+  jpa:
+    properties:
+      hibernate:
+        format_sql: true
+        allow_update_outside_transaction: false
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+  kafka:
+    bootstrap-servers: kafka-cluster-kafka-bootstrap.kafka:${KAFKA_PORT}
+    consumer:
+      group-id: ${KAFKA_CONSUMER_GROUP_ID}
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      auto-offset-reset: earliest
+    properties:
+      security.protocol: SASL_SSL
+      sasl.mechanism: SCRAM-SHA-512
+      sasl.jaas.config: >
+        org.apache.kafka.common.scram.ScramLoginModule required
+        username = ${KAFKA_USERNAME}
+        password = ${KAFKA_PASSWORD}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, prometheus
+      base-path: /actuator
+  server:
+    port: ${CS_METRICS_PORT:8091}
+  endpoint:
+    prometheus:
+      enabled: true
+    health:
+      probes:
+        enabled: true
+      show-details: always
+      group:
+        readiness:
+          include: db, diskSpace, ping
+  metrics:
+    export:
+      prometheus:
+        enabled: true
