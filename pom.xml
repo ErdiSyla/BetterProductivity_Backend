@@ -5,11 +5,11 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.erdi</groupId>
-  <artifactId>BetterProductivity_Backend</artifactId>
+  <artifactId>BetterProducts_Backend</artifactId>
   <version>1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-  <name>BetterProductivity_Backend</name>
+  <name>BetterProducts_Backend</name>
 
   <modules>
     <module>ApiGateway</module>
