@@ -57,7 +57,7 @@ public class JWTService {
     }
 
     private TokenKeyDTO getRandomActiveKey(){
-        List<TokenKeyDTO> activeKeys = kafkaConsumerService.getCachedAuthKeys();
+        List<TokenKeyDTO> activeKeys = kafkaConsumerService.getJwtKeys();
         return Optional.ofNullable(activeKeys)
                 .filter(keys -> !keys.isEmpty())
                 .map(keys ->{

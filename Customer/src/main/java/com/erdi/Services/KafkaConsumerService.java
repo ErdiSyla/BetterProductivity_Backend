@@ -18,7 +18,7 @@ import java.util.List;
 @Slf4j
 public class KafkaConsumerService {
 
-	private volatile List<TokenKeyDTO> cachedAuthKeys = Collections.emptyList();
+	private volatile List<TokenKeyDTO> jwtKeys = Collections.emptyList();
 
 	@Autowired
 	private ObjectMapper objectMapper;
@@ -27,10 +27,10 @@ public class KafkaConsumerService {
 	public void listenAuthKeys(String message){
 		try {
 			log.info("Received new customer keys : {}", message);
-			cachedAuthKeys = Collections.unmodifiableList(objectMapper.readValue(
+			jwtKeys = Collections.unmodifiableList(objectMapper.readValue(
 					message, new TypeReference<List<TokenKeyDTO>>() {
 					}));
-			log.info("Successfully parsed and cached token keys {}", cachedAuthKeys);
+			log.info("Successfully parsed and cached token keys {}", jwtKeys);
 		} catch (JsonProcessingException e){
 			log.error("Failed to parse token keys from message: {}\nError: {}",message,e.getMessage());
 		} catch (Exception e){

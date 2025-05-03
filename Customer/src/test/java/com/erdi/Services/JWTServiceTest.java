@@ -56,7 +56,7 @@ class JWTServiceTest {
     @Test
     void JWTService_generateToken_ReturnsResponseTest(){
         TokenKeyDTO tokenKeyDTO = new TokenKeyDTO(1,keyPair1PrivateKeyBase64);
-        given(mockKafkaConsumerService.getCachedAuthKeys())
+        given(mockKafkaConsumerService.getJwtKeys())
                 .willReturn(new LinkedList<>(Collections.singletonList(tokenKeyDTO)));
 
         String email = "user@example.com";
@@ -77,7 +77,7 @@ class JWTServiceTest {
         TokenKeyDTO tokenKeyDTO1 = new TokenKeyDTO(1,keyPair1PrivateKeyBase64);
         TokenKeyDTO tokenKeyDTO2 = new TokenKeyDTO(2,keyPair2PrivateKeyBase64);
         List<TokenKeyDTO> keys = Arrays.asList(tokenKeyDTO1,tokenKeyDTO2);
-        given(mockKafkaConsumerService.getCachedAuthKeys())
+        given(mockKafkaConsumerService.getJwtKeys())
                 .willReturn(keys);
 
         String email = "multi@example.com";
@@ -105,7 +105,7 @@ class JWTServiceTest {
 
     @Test
     void JWTService_generateToken_ThrowsNoActiveKeysAvailableExceptionTest(){
-        given(mockKafkaConsumerService.getCachedAuthKeys())
+        given(mockKafkaConsumerService.getJwtKeys())
                 .willReturn(Collections.emptyList());
 
         NoActiveKeysAvailableException e = assertThrows(NoActiveKeysAvailableException.class, () -> {
@@ -121,7 +121,7 @@ class JWTServiceTest {
     @Test
     void JWTService_generateToken_ThrowsJWTSigningExceptionTest(){
         TokenKeyDTO invalidKey = new TokenKeyDTO(3,"not-a-valid-base64-key");
-        given(mockKafkaConsumerService.getCachedAuthKeys())
+        given(mockKafkaConsumerService.getJwtKeys())
                 .willReturn(new ArrayList<>(Collections.singletonList(invalidKey)));
 
         JWTSigningException e = assertThrows(JWTSigningException.class, () -> {
