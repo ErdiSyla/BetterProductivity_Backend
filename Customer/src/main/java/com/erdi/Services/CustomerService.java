@@ -41,7 +41,7 @@ public class CustomerService {
 		String email = customerDto.email();
 
 		isValidEmail(email);
-		assertUserDoesNotExist(email);
+		customerDoesNotExist(email);
 
 		CustomerModel userModel = convertDtoToModel(customerDto);
 		customerRepository.save(userModel);
@@ -95,7 +95,7 @@ public class CustomerService {
 		}
 	}
 
-	private void assertUserDoesNotExist(String email){
+	private void customerDoesNotExist(String email){
 		boolean alreadyExists = customerRepository.existsByEmail(email);
 		if(alreadyExists){
 			throw new CustomerAlreadyExistsException
