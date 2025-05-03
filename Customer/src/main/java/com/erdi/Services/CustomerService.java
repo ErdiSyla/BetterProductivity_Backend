@@ -43,7 +43,7 @@ public class CustomerService {
 		isValidEmail(email);
 		customerDoesNotExist(email);
 
-		CustomerModel userModel = convertDtoToModel(customerDto);
+		CustomerModel userModel = dtoToModel(customerDto);
 		customerRepository.save(userModel);
 
 		String token = jwtService.generateToken(email);
@@ -84,7 +84,7 @@ public class CustomerService {
 						"Login successful.",ok.value()));
 	}
 
-	private CustomerModel convertDtoToModel(CustomerDTO customerDto){
+	private CustomerModel dtoToModel(CustomerDTO customerDto){
 		return new CustomerModel(null, customerDto.username(), customerDto.email(), encoder.encode(customerDto.password()));
 	}
 
