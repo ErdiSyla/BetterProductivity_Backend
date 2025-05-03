@@ -1,7 +1,7 @@
 package com.erdi.Services;
 
 import com.erdi.DTO.LoginRequestDTO;
-import com.erdi.DTO.UserDTO;
+import com.erdi.DTO.CustomerDTO;
 import com.erdi.Exceptions.Implementation.InvalidEmailException;
 import com.erdi.Exceptions.Implementation.InvalidLogInException;
 import com.erdi.Exceptions.Implementation.NoCustomerExistsException;
@@ -45,16 +45,16 @@ class CustomerServiceTest {
 	private CustomerService customerService;
 
 	private CustomerModel testCustomerModel;
-	private UserDTO testUser;
-	private UserDTO invalidUser;
+	private CustomerDTO testUser;
+	private CustomerDTO invalidUser;
 	private LoginRequestDTO loginRequestDTO;
 	private HttpServletResponse httpResponse;
 
 	@BeforeEach
 	void setUp(){
 		testCustomerModel = new CustomerModel(1,"User","servicetest@gmail.com","test pass");
-		testUser = new UserDTO("User","servicetest@gmail.com","test pass");
-		invalidUser = new UserDTO("User", "invalidemail","pass");
+		testUser = new CustomerDTO("User","servicetest@gmail.com","test pass");
+		invalidUser = new CustomerDTO("User", "invalidemail","pass");
 		loginRequestDTO = new LoginRequestDTO(testUser.email(),testUser.password());
 		httpResponse = mock(HttpServletResponse.class);
 	}

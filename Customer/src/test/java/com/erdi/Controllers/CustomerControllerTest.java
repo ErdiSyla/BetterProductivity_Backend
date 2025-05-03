@@ -2,7 +2,7 @@ package com.erdi.Controllers;
 
 import com.erdi.DTO.ApiResponse;
 import com.erdi.DTO.LoginRequestDTO;
-import com.erdi.DTO.UserDTO;
+import com.erdi.DTO.CustomerDTO;
 import com.erdi.Services.CustomerService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
@@ -44,12 +44,12 @@ public class CustomerControllerTest {
 	@Autowired
 	private ObjectMapper objectMapper;
 
-	private UserDTO testUser;
+	private CustomerDTO testUser;
 	private LoginRequestDTO loginRequestDTO;
 
 	@BeforeEach
 	void setUp() {
-		testUser = new UserDTO("Test User", "testUser@gmail.com", "testUserPassword");
+		testUser = new CustomerDTO("Test User", "testUser@gmail.com", "testUserPassword");
 		loginRequestDTO = new LoginRequestDTO(testUser.email(),testUser.password());
 		MockitoAnnotations.openMocks(this);
 	}
@@ -58,7 +58,7 @@ public class CustomerControllerTest {
 	void AuthController_SignUp_TestReturnsToken() throws Exception {
 		ApiResponse response = new ApiResponse("User created successfully.",HttpStatus.CREATED.value());
 		given(mockCustomerService.signUp(any(HttpServletResponse.class)
-				,any(UserDTO.class)))
+				,any(CustomerDTO.class)))
 				.willReturn(new ResponseEntity<>(response,HttpStatus.CREATED));
 
 		mockMvc.perform(post("/auth/signup")

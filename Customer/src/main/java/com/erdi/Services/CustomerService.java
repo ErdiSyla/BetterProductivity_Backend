@@ -2,7 +2,7 @@ package com.erdi.Services;
 
 import com.erdi.DTO.ApiResponse;
 import com.erdi.DTO.LoginRequestDTO;
-import com.erdi.DTO.UserDTO;
+import com.erdi.DTO.CustomerDTO;
 import com.erdi.Exceptions.Implementation.InvalidEmailException;
 import com.erdi.Exceptions.Implementation.InvalidLogInException;
 import com.erdi.Exceptions.Implementation.NoCustomerExistsException;
@@ -37,13 +37,13 @@ public class CustomerService {
 
 	@Transactional
 	public ResponseEntity<ApiResponse> signUp(HttpServletResponse response,
-											  UserDTO userDto) {
-		String email = userDto.email();
+											  CustomerDTO customerDto) {
+		String email = customerDto.email();
 
 		isValidEmail(email);
 		assertUserDoesNotExist(email);
 
-		CustomerModel userModel = convertDtoToModel(userDto);
+		CustomerModel userModel = convertDtoToModel(customerDto);
 		customerRepository.save(userModel);
 
 		String token = jwtService.generateToken(email);
@@ -84,8 +84,8 @@ public class CustomerService {
 						"Login successful.",ok.value()));
 	}
 
-	private CustomerModel convertDtoToModel(UserDTO userDto){
-		return new CustomerModel(null,userDto.username(),userDto.email(), encoder.encode(userDto.password()));
+	private CustomerModel convertDtoToModel(CustomerDTO customerDto){
+		return new CustomerModel(null, customerDto.username(), customerDto.email(), encoder.encode(customerDto.password()));
 	}
 
 	private void isValidEmail(String email) {

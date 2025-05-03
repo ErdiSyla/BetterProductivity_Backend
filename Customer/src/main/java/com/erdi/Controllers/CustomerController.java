@@ -2,7 +2,7 @@ package com.erdi.Controllers;
 
 import com.erdi.DTO.ApiResponse;
 import com.erdi.DTO.LoginRequestDTO;
-import com.erdi.DTO.UserDTO;
+import com.erdi.DTO.CustomerDTO;
 import com.erdi.Services.CustomerService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -20,8 +20,8 @@ public class CustomerController {
 	private final CustomerService customerService;
 
 	@PostMapping("/signup")
-	public ResponseEntity<ApiResponse> signUp(HttpServletResponse response, @RequestBody UserDTO userDto){
-		return customerService.signUp(response,userDto);
+	public ResponseEntity<ApiResponse> signUp(HttpServletResponse response, @RequestBody CustomerDTO customerDto){
+		return customerService.signUp(response, customerDto);
 	}
 
 	@PostMapping("/login")
