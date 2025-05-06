@@ -1,8 +1,8 @@
 package com.erdi.Services;
 
-import com.erdi.DTO.ApiResponse;
-import com.erdi.DTO.LoginRequestDTO;
-import com.erdi.DTO.CustomerDTO;
+import com.erdi.DTOs.ApiResponse;
+import com.erdi.DTOs.LoginRequestDTO;
+import com.erdi.DTOs.CustomerDTO;
 import com.erdi.Exceptions.Implementation.InvalidEmailException;
 import com.erdi.Exceptions.Implementation.InvalidLogInException;
 import com.erdi.Exceptions.Implementation.NoCustomerExistsException;

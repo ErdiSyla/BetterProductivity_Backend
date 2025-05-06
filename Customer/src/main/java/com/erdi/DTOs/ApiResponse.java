@@ -1,4 +1,4 @@
-package com.erdi.DTO;
+package com.erdi.DTOs;
 
 public record ApiResponse(String message, int status) {
 

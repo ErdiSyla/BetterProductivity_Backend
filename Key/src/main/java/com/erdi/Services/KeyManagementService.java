@@ -1,8 +1,8 @@
 package com.erdi.Services;
 
-import com.erdi.DTO.CustomerKeyDTO;
-import com.erdi.DTO.KeyActivity;
-import com.erdi.DTO.TokenKeyDTO;
+import com.erdi.DTOs.CustomerKeyDTO;
+import com.erdi.DTOs.KeyActivity;
+import com.erdi.DTOs.TokenKeyDTO;
 import com.erdi.Models.TokenKeyModel;
 import com.erdi.Repositories.TokenKeyRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;

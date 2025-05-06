@@ -1,6 +1,6 @@
 package com.erdi.Services;
 
-import com.erdi.DTO.TokenKeyDTO;
+import com.erdi.DTOs.TokenKeyDTO;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,11 +30,11 @@ public class KafkaConsumerService {
 			jwtKeys = Collections.unmodifiableList(objectMapper.readValue(
 					message, new TypeReference<List<TokenKeyDTO>>() {
 					}));
-			log.info("Successfully parsed and cached token keys {}", jwtKeys);
+			log.info("Successfully parsed token keys {}", jwtKeys);
 		} catch (JsonProcessingException e){
 			log.error("Failed to parse token keys from message: {}\nError: {}",message,e.getMessage());
 		} catch (Exception e){
-			log.error("Unexpected error while processing message from auth-keys topic: {}\nError: {}",
+			log.error("Unexpected error while processing message from customer-keys topic: {}\nError: {}",
 					message, e.getMessage());
 		}
 	}

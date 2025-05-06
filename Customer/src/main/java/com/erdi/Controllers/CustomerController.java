@@ -1,8 +1,8 @@
 package com.erdi.Controllers;
 
-import com.erdi.DTO.ApiResponse;
-import com.erdi.DTO.LoginRequestDTO;
-import com.erdi.DTO.CustomerDTO;
+import com.erdi.DTOs.ApiResponse;
+import com.erdi.DTOs.LoginRequestDTO;
+import com.erdi.DTOs.CustomerDTO;
 import com.erdi.Services.CustomerService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

@@ -1,6 +1,6 @@
 package com.erdi.Models;
 
-import com.erdi.DTO.KeyActivity;
+import com.erdi.DTOs.KeyActivity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

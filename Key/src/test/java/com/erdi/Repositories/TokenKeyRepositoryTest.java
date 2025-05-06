@@ -1,6 +1,6 @@
 package com.erdi.Repositories;
 
-import com.erdi.DTO.KeyActivity;
+import com.erdi.DTOs.KeyActivity;
 import com.erdi.Models.TokenKeyModel;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;

@@ -1,6 +1,6 @@
 package com.erdi.Services;
 
-import com.erdi.DTO.TokenKeyDTO;
+import com.erdi.DTOs.TokenKeyDTO;
 import com.erdi.Exceptions.Implementation.JWTSigningException;
 import com.erdi.Exceptions.Implementation.NoActiveKeysAvailableException;
 import com.erdi.Models.ErrorCode;
