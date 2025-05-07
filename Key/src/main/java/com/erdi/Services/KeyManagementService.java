@@ -1,8 +1,6 @@
 package com.erdi.Services;
 
-import com.erdi.DTOs.CustomerKeyDTO;
 import com.erdi.DTOs.KeyActivity;
-import com.erdi.DTOs.TokenKeyDTO;
 import com.erdi.Models.TokenKeyModel;
 import com.erdi.Repositories.TokenKeyRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -18,8 +16,8 @@ import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Base64;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -88,78 +86,45 @@ public class KeyManagementService {
         return Base64.getEncoder().encodeToString(key);
     }
 
-    private String convertTokenKeysToJson(List<TokenKeyModel> keys){
-        try{
-            List<TokenKeyDTO> DTOs = keys.stream()
-                    .map(key -> new TokenKeyDTO(key.getKeyId(), key.getPublicKey(),key.getPrivateKey()))
-                        .toList();
-            return mapper.writeValueAsString(DTOs);
-            } catch (JsonProcessingException e){
-            log.error("JSON conversion failed,applying fallback format for TokenKeys" ,e);
-            return fallBackKeyFormat(keys);
+    private void publishKeyChanges(String eventDescription) {
+        String activeKeys;
+        String validationKeys;
+        Map<Integer, String> activeKeysMap = getActiveKeysMap();
+        Map<Integer, String> validationKeysMap = getValidationKeysMap();
+        try {
+            activeKeys = mapper.writeValueAsString(activeKeysMap);
+            validationKeys = mapper.writeValueAsString(validationKeysMap);
+        }catch (JsonProcessingException e){
+            log.error("JSON serialization failed, falling back to manual builder.", e);
+            activeKeys = manualSerializer(activeKeysMap);
+            validationKeys = manualSerializer(validationKeysMap);
         }
-    }
-
-    private String convertCustomerKeysToJson(List<TokenKeyModel> keys){
-        try{
-            List<CustomerKeyDTO> DTOs = keys.stream()
-                    .map(key -> new CustomerKeyDTO(key.getKeyId(),key.getPrivateKey()))
-                    .toList();
-            return mapper.writeValueAsString(DTOs);
-        } catch (JsonProcessingException e) {
-            log.error("JSON conversion failed,applying fallback format for customer keys", e);
-            return fallBackCustomerKeyFormat(keys);
-        }
-    }
-
-    private String fallBackKeyFormat(List<TokenKeyModel> keys){
-        StringBuilder sb = new StringBuilder("[\n");
-        for(TokenKeyModel key : keys){
-            sb.append("  {\n")
-                    .append("    \"keyId\": ").append(key.getKeyId()).append(",\n")
-                    .append("    \"publicKey\": \"").append(key.getPublicKey()).append("\",\n")
-                    .append("    \"privateKey\": \"").append(key.getPrivateKey()).append("\",\n")
-                    .append("  },\n");
-        }
-
-        if(!keys.isEmpty()){
-            sb.setLength(sb.length()-2);
-            sb.append("\n");
-        }
-        sb.append("]");
-        return sb.toString();
-    }
-
-    private String fallBackCustomerKeyFormat(List<TokenKeyModel> keys){
-        StringBuilder sb = new StringBuilder("[\n");
-        for(TokenKeyModel key : keys){
-            sb.append("  {\n")
-                    .append("    \"keyId\": ").append(key.getKeyId()).append(",\n")
-                    .append("    \"privateKey\": \"").append(key.getPrivateKey()).append("\",\n")
-                    .append("  },\n");
-        }
-
-        if(!keys.isEmpty()){
-            sb.setLength(sb.length()-2);
-            sb.append("\n");
-        }
-        sb.append("]");
-        return sb.toString();
-    }
-
-    private void publishKeyChanges(String eventDescription){
-        String activeKeysMessage = convertCustomerKeysToJson(findAllActiveKeys());
-        String allKeysMessage = convertTokenKeysToJson(findAllKeys());
-        kafkaProducerService.sendMessage(CUSTOMER_TOPIC,activeKeysMessage);
-        kafkaProducerService.sendMessage(VALIDATION_TOPIC, allKeysMessage);
+        kafkaProducerService.sendMessage(CUSTOMER_TOPIC, activeKeys);
+        kafkaProducerService.sendMessage(VALIDATION_TOPIC, validationKeys);
         kafkaProducerService.sendMessage(KEY_CHANGE_TOPIC, eventDescription + " at " + Instant.now());
     }
 
-    private List<TokenKeyModel> findAllActiveKeys(){
-        return tokenKeyRepository.findAllActiveKeys();
+    private String manualSerializer(Map<Integer, String> map){
+        StringJoiner sj = new StringJoiner(",","{","}");
+        map.forEach((k,v) -> {
+            sj.add("\"" + k + "\":\"" + v +"\"");
+                });
+        return sj.toString();
     }
 
-    private List<TokenKeyModel> findAllKeys(){
-        return tokenKeyRepository.findAll();
+    private Map<Integer, String> getActiveKeysMap(){
+        return mapGenerator(tokenKeyRepository.findAllActiveKeys());
+    }
+
+    private Map<Integer, String> getValidationKeysMap(){
+        return mapGenerator(tokenKeyRepository.findAll());
+    }
+
+    Map<Integer, String> mapGenerator(List<TokenKeyModel> list){
+        return list.stream()
+                .collect(Collectors.toMap(
+                        TokenKeyModel::getKeyId,
+                        TokenKeyModel::getPublicKey
+                ));
     }
 }
