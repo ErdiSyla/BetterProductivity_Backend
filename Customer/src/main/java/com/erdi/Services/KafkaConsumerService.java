@@ -18,26 +18,6 @@ import java.util.List;
 @Slf4j
 public class KafkaConsumerService {
 
-	private volatile List<TokenKeyDTO> jwtKeys = Collections.emptyList();
-
-	@Autowired
-	private ObjectMapper objectMapper;
-
-	@KafkaListener(topics = {"customer-keys"}, groupId = "${KAFKA_CONSUMER_GROUP_ID}")
-	public void listenAuthKeys(String message){
-		try {
-			log.info("Received new customer keys : {}", message);
-			jwtKeys = Collections.unmodifiableList(objectMapper.readValue(
-					message, new TypeReference<List<TokenKeyDTO>>() {
-					}));
-			log.info("Successfully parsed token keys {}", jwtKeys);
-		} catch (JsonProcessingException e){
-			log.error("Failed to parse token keys from message: {}\nError: {}",message,e.getMessage());
-		} catch (Exception e){
-			log.error("Unexpected error while processing message from customer-keys topic: {}\nError: {}",
-					message, e.getMessage());
-		}
-	}
 
 	@KafkaListener(topics = "key-change", groupId = "${KAFKA_CONSUMER_GROUP_ID}")
 	public void listenKeyChanged(String message){
