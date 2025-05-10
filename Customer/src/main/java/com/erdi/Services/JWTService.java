@@ -31,9 +31,9 @@ public class JWTService {
     public String generateToken(String email){
         Map<String, Object> claims = new HashMap<>();
 
-        TokenKeyDTO tokenKeyDTO = getRandomActiveKey();
+        TokenKeyDTO randomActiveKey = getRandomActiveKey();
 
-        return tokenGenerator(claims,email,tokenKeyDTO);
+        return tokenGenerator(claims,email,randomActiveKey);
     }
 
     private String tokenGenerator (Map<String, Object> claims,
@@ -56,24 +56,29 @@ public class JWTService {
 
     }
 
-    private TokenKeyDTO getRandomActiveKey(){
-        List<TokenKeyDTO> activeKeys = kafkaConsumerService.getJwtKeys();
-        return Optional.ofNullable(activeKeys)
-                .filter(keys -> !keys.isEmpty())
-                .map(keys ->{
-                        if(keys.size() == 1) {
-                            return keys.getFirst();
-                    }
-                        return keys
-                                .get(ThreadLocalRandom.current().nextInt(keys.size()));
-                })
-                .orElseThrow(() -> {
-                    log.error("No active JWT keys available at {}. errorCode: {}",
-                            Instant.now(), ErrorCode.JWT_NO_KEYS.getCode());
-                    return new NoActiveKeysAvailableException
-                            ("No active keys available for JWT generation", ErrorCode.JWT_NO_KEYS);
-                });
-    }
+        private TokenKeyDTO getRandomActiveKey(){
+            Map<Integer,String> activeKeys = kafkaConsumerService.getJwtKeys();
+
+            if(activeKeys == null || activeKeys.isEmpty()){
+                log.error("No active JWT keys available at {}. errorCode : {}",
+                        Instant.now(), ErrorCode.JWT_NO_KEYS.getCode());
+                throw new NoActiveKeysAvailableException(
+                        "No active keys available for JWT generation", ErrorCode.JWT_NO_KEYS
+                );
+            }
+
+            List<Map.Entry<Integer,String>> entries = new ArrayList<>(activeKeys.entrySet());
+
+            Map.Entry<Integer,String> chosenEntry;
+            if(entries.size() == 1){
+                chosenEntry = entries.get(0);
+            } else{
+                int randomIndex = ThreadLocalRandom.current().nextInt(entries.size());
+                chosenEntry = entries.get(randomIndex);
+            }
+
+            return new TokenKeyDTO(chosenEntry.getKey(),chosenEntry.getValue());
+        }
 
     private PrivateKey getPrivateKey(TokenKeyDTO tokenKeyDTO){
         try{
