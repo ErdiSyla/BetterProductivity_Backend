@@ -1,4 +1,4 @@
-package com.erdi.Services;
+package com.erdi.Config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.annotation.Bean;
