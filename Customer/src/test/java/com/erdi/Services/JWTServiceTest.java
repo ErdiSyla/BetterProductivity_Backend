@@ -4,10 +4,7 @@ import com.erdi.DTOs.TokenKeyDTO;
 import com.erdi.Exceptions.Implementation.JWTSigningException;
 import com.erdi.Exceptions.Implementation.NoActiveKeysAvailableException;
 import com.erdi.Models.ErrorCode;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.Jwt;
-import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,6 +17,7 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.util.*;
 
+import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
@@ -36,8 +34,9 @@ class JWTServiceTest {
 
     private KeyPair keyPair1;
     private KeyPair keyPair2;
-    private String keyPair1PrivateKeyBase64;
-    private String keyPair2PrivateKeyBase64;
+    private TokenKeyDTO tokenKeyDTO1;
+    private TokenKeyDTO tokenKeyDTO2;
+    private TokenKeyDTO invalidKey;
 
     @BeforeEach
     void setUp() throws Exception {
@@ -46,18 +45,22 @@ class JWTServiceTest {
         keyPair1 = keyGen.generateKeyPair();
         keyPair2 = keyGen.generateKeyPair();
 
-        keyPair1PrivateKeyBase64 = Base64.getEncoder()
+        String keyPair1PrivateKeyBase64 = Base64.getEncoder()
                 .encodeToString(keyPair1.getPrivate().getEncoded());
-        keyPair2PrivateKeyBase64 = Base64.getEncoder()
+        String keyPair2PrivateKeyBase64 = Base64.getEncoder()
                 .encodeToString(keyPair2.getPrivate().getEncoded());
+
+        tokenKeyDTO1 = new TokenKeyDTO(1, keyPair1PrivateKeyBase64);
+        tokenKeyDTO2 = new TokenKeyDTO(2, keyPair2PrivateKeyBase64);
+        invalidKey = new TokenKeyDTO(3,"not-a-valid-base64-key");
     }
 
 
     @Test
     void JWTService_generateToken_ReturnsResponseTest(){
-        TokenKeyDTO tokenKeyDTO = new TokenKeyDTO(1,keyPair1PrivateKeyBase64);
+        Map<Integer, String> keys = Map.ofEntries(entry(tokenKeyDTO1.keyId(),tokenKeyDTO1.privateKey()));
         given(mockKafkaConsumerService.getJwtKeys())
-                .willReturn(new LinkedList<>(Collections.singletonList(tokenKeyDTO)));
+                .willReturn(keys);
 
         String email = "user@example.com";
         String token = jwtService.generateToken(email);
@@ -74,9 +77,8 @@ class JWTServiceTest {
 
     @Test
     void JWTService_generateToken_ReturnsResponseWithMultipleKeysTest(){
-        TokenKeyDTO tokenKeyDTO1 = new TokenKeyDTO(1,keyPair1PrivateKeyBase64);
-        TokenKeyDTO tokenKeyDTO2 = new TokenKeyDTO(2,keyPair2PrivateKeyBase64);
-        List<TokenKeyDTO> keys = Arrays.asList(tokenKeyDTO1,tokenKeyDTO2);
+        Map<Integer, String> keys = Map.ofEntries(entry(tokenKeyDTO1.keyId(),tokenKeyDTO1.privateKey()),
+                entry(tokenKeyDTO2.keyId(),tokenKeyDTO2.privateKey()));
         given(mockKafkaConsumerService.getJwtKeys())
                 .willReturn(keys);
 
@@ -106,7 +108,7 @@ class JWTServiceTest {
     @Test
     void JWTService_generateToken_ThrowsNoActiveKeysAvailableExceptionTest(){
         given(mockKafkaConsumerService.getJwtKeys())
-                .willReturn(Collections.emptyList());
+                .willReturn(Collections.emptyMap());
 
         NoActiveKeysAvailableException e = assertThrows(NoActiveKeysAvailableException.class, () -> {
             jwtService.generateToken("test@example.com");
@@ -120,9 +122,9 @@ class JWTServiceTest {
 
     @Test
     void JWTService_generateToken_ThrowsJWTSigningExceptionTest(){
-        TokenKeyDTO invalidKey = new TokenKeyDTO(3,"not-a-valid-base64-key");
+        Map<Integer, String> keys = Map.ofEntries(entry(invalidKey.keyId(),invalidKey.privateKey()));
         given(mockKafkaConsumerService.getJwtKeys())
-                .willReturn(new ArrayList<>(Collections.singletonList(invalidKey)));
+                .willReturn(keys);
 
         JWTSigningException e = assertThrows(JWTSigningException.class, () -> {
             jwtService.generateToken("test@example.com");
