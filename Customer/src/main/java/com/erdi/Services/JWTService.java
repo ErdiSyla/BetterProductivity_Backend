@@ -49,7 +49,7 @@ public class JWTService {
                 .expiration(new Date(expirationDate))
                 .and()
                 .header()
-                .keyId(tokenKeyDTO.keyId()+"")
+                .keyId(String.valueOf(tokenKeyDTO.keyId()))
                 .and()
                 .signWith(getPrivateKey(tokenKeyDTO))
                 .compact();
