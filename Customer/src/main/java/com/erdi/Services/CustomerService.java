@@ -1,14 +1,14 @@
 package com.erdi.Services;
 
 import com.erdi.DTOs.ApiResponse;
-import com.erdi.DTOs.LoginRequestDTO;
 import com.erdi.DTOs.CustomerDTO;
+import com.erdi.DTOs.LoginRequestDTO;
+import com.erdi.Exceptions.Implementation.CustomerAlreadyExistsException;
 import com.erdi.Exceptions.Implementation.InvalidEmailException;
 import com.erdi.Exceptions.Implementation.InvalidLogInException;
 import com.erdi.Exceptions.Implementation.NoCustomerExistsException;
-import com.erdi.Exceptions.Implementation.CustomerAlreadyExistsException;
-import com.erdi.Models.ErrorCode;
 import com.erdi.Models.CustomerModel;
+import com.erdi.Models.ErrorCode;
 import com.erdi.Repositories.CustomerRepository;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
@@ -41,7 +41,10 @@ public class CustomerService {
 		String email = customerDto.email();
 
 		isValidEmail(email);
-		customerDoesNotExist(email);
+		if(doesCustomerExist(email)){
+			throw new CustomerAlreadyExistsException
+					("A user with the same email exists.", ErrorCode.USER_ALREADY_EXISTS);
+		}
 
 		CustomerModel userModel = dtoToModel(customerDto);
 		customerRepository.save(userModel);
@@ -95,12 +98,8 @@ public class CustomerService {
 		}
 	}
 
-	private void customerDoesNotExist(String email){
-		boolean alreadyExists = customerRepository.existsByEmail(email);
-		if(alreadyExists){
-			throw new CustomerAlreadyExistsException
-					("A user with the same email exists.", ErrorCode.USER_ALREADY_EXISTS);
-		}
+	private boolean doesCustomerExist (String email){
+        return customerRepository.existsByEmail(email);
 	}
 
 }
