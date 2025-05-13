@@ -100,7 +100,7 @@ class CustomerServiceTest {
 
 	@Test
 	void UserService_LogIn_ReturnsResponseTest(){
-		given(customerRepository.findUserByEmail(testUser.email()))
+		given(customerRepository.findCustomerByEmail(testUser.email()))
 				.willReturn(Optional.of(testCustomerModel));
 		given(bCryptPasswordEncoder.matches(testUser.password(), testCustomerModel.getPassword()))
 				.willReturn(true);
@@ -114,7 +114,7 @@ class CustomerServiceTest {
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
 
-		verify(customerRepository,times(1)).findUserByEmail(testUser.email());
+		verify(customerRepository,times(1)).findCustomerByEmail(testUser.email());
 		verify(bCryptPasswordEncoder,times(1))
 				.matches(testUser.password(), testCustomerModel.getPassword());
 	}
@@ -128,12 +128,12 @@ class CustomerServiceTest {
 
 		assertThat(noUser).isNotNull();
 		assertThat(noUser.getMessage()).isEqualTo("Invalid email or password.");
-		verify(customerRepository,times(1)).findUserByEmail(testUser.email());
+		verify(customerRepository,times(1)).findCustomerByEmail(testUser.email());
 	}
 
 	@Test
 	void UserService_LogIn_ThrowsInvalidLogInExceptionTest(){
-		given(customerRepository.findUserByEmail(testUser.email()))
+		given(customerRepository.findCustomerByEmail(testUser.email()))
 				.willReturn(Optional.of(testCustomerModel));
 
 		InvalidLogInException invalidPassword = assertThrows(InvalidLogInException.class,() -> {
@@ -142,7 +142,7 @@ class CustomerServiceTest {
 
 		assertThat(invalidPassword).isNotNull();
 		assertThat(invalidPassword.getMessage()).isEqualTo("Invalid email or password.");
-		verify(customerRepository,times(1)).findUserByEmail(testUser.email());
+		verify(customerRepository,times(1)).findCustomerByEmail(testUser.email());
 		verify(bCryptPasswordEncoder,times(1))
 				.matches(testCustomerModel.getPassword(), testUser.password());
 	}

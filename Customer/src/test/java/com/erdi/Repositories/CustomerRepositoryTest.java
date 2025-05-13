@@ -70,8 +70,8 @@ class CustomerRepositoryTest {
 	void UserRepository_FindByEmail_ReturnsUserTest(){
 		String email = customerRepository.saveAndFlush(testCustomerModel1).getEmail();
 		CustomerModel returnedUser = null;
-		if(customerRepository.findUserByEmail(email).isPresent()) {
-			returnedUser = customerRepository.findUserByEmail(email).get();
+		if(customerRepository.findCustomerByEmail(email).isPresent()) {
+			returnedUser = customerRepository.findCustomerByEmail(email).get();
 		}else{
 			fail("User could not be found. Was either not stored properly or invalid email");
 		}

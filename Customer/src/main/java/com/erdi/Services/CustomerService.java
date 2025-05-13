@@ -64,7 +64,7 @@ public class CustomerService {
 		String email = loginRequestDTO.email();
 		String password = loginRequestDTO.password();
 
-		CustomerModel customerModel = customerRepository.findUserByEmail(email)
+		CustomerModel customerModel = customerRepository.findCustomerByEmail(email)
 				.orElseThrow(() -> {
 					log.warn("No user found for email: {}", email);
 					 return new NoCustomerExistsException
