@@ -8,7 +8,7 @@ import com.erdi.Exceptions.Implementation.InvalidEmailException;
 import com.erdi.Exceptions.Implementation.InvalidLogInException;
 import com.erdi.Exceptions.Implementation.NoCustomerExistsException;
 import com.erdi.Models.CustomerModel;
-import com.erdi.Models.ErrorCode;
+import com.erdi.DTOs.ErrorCode;
 import com.erdi.Repositories.CustomerRepository;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;

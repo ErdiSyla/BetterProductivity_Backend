@@ -1,4 +1,4 @@
-package com.erdi.Models;
+package com.erdi.DTOs;
 
 import lombok.Getter;
 

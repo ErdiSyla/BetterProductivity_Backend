@@ -1,6 +1,6 @@
 package com.erdi.Exceptions.Abstract;
 
-import com.erdi.Models.ErrorCode;
+import com.erdi.DTOs.ErrorCode;
 import lombok.Getter;
 
 @Getter
